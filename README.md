@@ -1,3 +1,58 @@
+## ディレクトリ構造
+
+```sh
+users/
+  ├ user_1_uuid/
+  ├ ...
+  └ user_n_uuid/
+      ├ .git/
+      ├ permissions.json
+      └ services/
+          ├ service_1_uuid/
+          ├ ...
+          └ service_x_uuid/
+              ├ file_1
+              ├ ...
+              └ file_n
+```
+
+## 権限情報
+
+```json
+{
+  "xxx-xxx-xxx-xxx": {
+    "xxx-xxx-xxx-xxx": {
+      "read": true,
+      "write": true
+    },
+    "yyy-yyy-yyy-yyy": {
+      "read": true,
+      "write": false
+    }
+  },
+  "yyy-yyy-yyy-yyy": {
+    "xxx-xxx-xxx-xxx": {
+      "read": true,
+      "write": false
+    },
+    "yyy-yyy-yyy-yyy": {
+      "read": true,
+      "write": true
+    },
+    "zzz-zzz-zzz-zzz": {
+      "read": true,
+      "write": false
+    }
+  },
+  "zzz-zzz-zzz-zzz": {
+    "zzz-zzz-zzz-zzz": {
+      "read": true,
+      "write": true
+    }
+  }
+}
+```
+
 ## API
 
 * https://xxx.xxx.xxx/v1/... のように、urlの最初にAPIのバージョンを含める。  
@@ -250,8 +305,8 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/dir
 指定されたパスにディレクトリを作成する。  
 
 ```sh
-# POST /users/:user_uuid/services/:service_uuid/directory/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar/hoge/ -X POST -H ...
+# PUT/POST /users/:user_uuid/services/:service_uuid/directory/*path
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar/hoge/ -X PUT -H ...
 > {
 >   "status": "ok",
 >   "data": {
@@ -304,8 +359,8 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/fil
 指定されたパスにファイルを作成する。  
 
 ```sh
-# POST /users/:user_uuid/services/:service_uuid/file/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -H ... -d -@ <<EOF
+# PUT/POST /users/:user_uuid/services/:service_uuid/file/*path
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X PUT -H ... -d -@ <<EOF
 (ファイルの中身)
 EOF
 > {
@@ -321,7 +376,7 @@ EOF
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
-|なし|||
+|overwrite||既にファイルが存在する場合に上書きするかどうか|
 
 #### ファイルの削除
 
@@ -381,3 +436,26 @@ EOF
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
 |なし|||
+
+===
+
+### アクセス権のAPI
+
+#### アクセス権の一覧
+
+そのユーザーの領域にアクセスできるサービスのUUIDの一覧を返す。  
+
+```sh
+# GET /v1/users/:user_uuid/permissions
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/permissions -H ...
+> {
+>   "status": "ok",
+>   "data": {
+>     "permissions": [
+>       {
+>         "uuid": "xxx-xxx-xxx-xxx"
+>       }
+>     ]
+>   }
+> }
+```
