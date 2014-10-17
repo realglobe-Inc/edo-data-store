@@ -1,0 +1,2 @@
+class GlobalSettings < BasicSettings
+end

@@ -1,0 +1,9 @@
+development: &dev
+  personal_cloud_dir: "tmp/pc-root/"
+
+production:
+  <<: *dev
+
+test:
+  <<: *dev
+  personal_cloud_dir: "/tmp/pc-test/"
