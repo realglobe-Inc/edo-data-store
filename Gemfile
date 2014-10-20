@@ -43,7 +43,7 @@ group :test do
   gem "guard-rspec"
   gem "guard-spring"
   gem "spring-commands-rspec"
-  gem "capybara"
+#  gem "capybara"
   gem "database_cleaner"
   gem "email_spec"
   gem "webmock"
