@@ -12,11 +12,11 @@ function precompile_assets() {
 }
 
 case $1 in
-    start|load|restart|reload)
+    restart|reload)
         precompile_assets
         god_action unicorn $@
         ;;
-    *)
+    start|stop|load|*)
         god_action unicorn $@
         ;;
 esac
