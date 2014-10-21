@@ -104,7 +104,7 @@ $ curl https://xxx.xxx.xxx/v1/users -H ...
 
 ```sh
 # POST /users
-$ curl https://xxx.xxx.xxx/v1/users -H ... -d -@ <<EOF
+$ curl https://xxx.xxx.xxx/v1/users -H ... -d @- <<EOF
 {
   "uuid": "xxx-xxx-xxx-xxx",
   "storage_size": "1GB"
@@ -154,7 +154,7 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx -H ...
 
 ```sh
 # PATCH/PUT /users/:user_uuid
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx -X PATCH -H ... -d -@ <<EOF
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx -X PATCH -H ... -d @- <<EOF
 {
   "storage_size": "2GB"
 }
@@ -229,7 +229,7 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services -H ...
 
 ```sh
 # POST /users/:user_uuid/services
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services -H ... -d -@ <<EOF
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services -H ... -d @- <<EOF
 {
   "uuid": "xxx-xxx-xxx-xxx"
 }
@@ -360,7 +360,7 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/fil
 
 ```sh
 # PUT/POST /users/:user_uuid/services/:service_uuid/file/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X PUT -H ... -d -@ <<EOF
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X PUT -H ... -d @- <<EOF
 (ファイルの中身)
 EOF
 > {
@@ -422,7 +422,7 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/sta
 
 ```sh
 # POST /users/:user_uuid/services/:service_uuid/statements
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/statements -H ... -d -@ <<EOF
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/statements -H ... -d @- <<EOF
 {...}
 EOF
 > {
