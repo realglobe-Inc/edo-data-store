@@ -1,0 +1,19 @@
+/home/azureuser/edo-personal-cloud/log/*.log {
+    missingok
+    daily
+    rotate 180
+    compress
+    nocreate
+    notifempty
+    copytruncate
+}
+
+/home/azureuser/nginx/logs/*.log {
+    missingok
+    daily
+    rotate 180
+    compress
+    nocreate
+    notifempty
+    copytruncate
+}

@@ -1,0 +1,9 @@
+/var/log/mariadb/*.log {
+    create 640 mysql mysql
+    notifempty
+    missingok
+    daily
+    rotate 180
+    compress
+    copytruncate
+}
