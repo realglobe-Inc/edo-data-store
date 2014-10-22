@@ -8,14 +8,14 @@ Rails.application.routes.draw do
       resources :services, only: %w(index show create update destroy), param: :service_uuid
       resources :services, only: %w(), param: :uuid do
         # サービスから利用するAPI
-        resources :directories, only: %w() do
+        resources :directory, only: %w() do
           collection do
-            get "/*path" => "storages#ls"
+            get "/(*path)" => "storages#ls"
             match "/*path" => "storages#mkdir", via: %w(post put)
             delete "/*path" => "storages#rmdir"
           end
         end
-        resources :files, only: %w() do
+        resources :file, only: %w() do
           collection do
             get "/*path" => "storages#show"
             match "/*path" => "storages#create", via: %w(post put)
