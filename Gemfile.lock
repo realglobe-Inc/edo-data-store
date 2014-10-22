@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:realglobe-Inc/store_agent.git
-  revision: c5e2636fed7aa171d92e4bb2cc63e18a6b3304eb
+  revision: 59e376b67265746d12ed045c655c935a5d35081e
   specs:
     store_agent (0.7.0)
       oj
@@ -166,7 +166,7 @@ GEM
     multi_json (1.10.1)
     mysql2 (0.3.16)
     netrc (0.7.7)
-    oj (2.10.2)
+    oj (2.10.3)
     parallel (1.2.4)
     paranoia (2.0.2)
       activerecord (~> 4.0)
