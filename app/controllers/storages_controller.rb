@@ -73,16 +73,11 @@ class StoragesController < ApplicationController
     @service_node = @workspace.directory(service_id)
   end
 
-  def path_with_extension
-    extension = params[:format] && ".#{params[:format]}"
-    "#{params[:path]}#{extension}"
-  end
-
   def find_directory
-    @directory = @service_node.directory(path_with_extension)
+    @directory = @service_node.directory(params[:path])
   end
 
   def find_file
-    @file = @service_node.file(path_with_extension)
+    @file = @service_node.file(params[:path])
   end
 end

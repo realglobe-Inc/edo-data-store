@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   # API
-  scope "v1" do
+  scope "v1", format: false do
     # ユーザー管理サーバーから利用するAPI
     resources :users, only: %w(index show create update destroy), param: :user_uuid
     resources :users, only: %w(), param: :uuid do
