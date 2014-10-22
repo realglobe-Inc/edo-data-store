@@ -61,6 +61,9 @@ http {
             more_set_headers "Expires: Thu, 01 Dec 1994 16:00:00 GMT";
             more_set_headers "X-FRAME-OPTIONS: SAMEORIGIN";
 
+            error_page   400 /400.json;
+            proxy_intercept_errors on;
+
             proxy_set_header Content-Type $request_content_type;
             proxy_set_header X-Original-Content-Type $http_content_type;
 
