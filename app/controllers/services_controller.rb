@@ -1,22 +1,11 @@
 class ServicesController < ApplicationController
-  before_action :find_workspace
+  include StorageManager
+
+  before_action :validates_user_to_be_present
+  before_action :validates_service_to_be_absent, only: %w(create)
 
   def create
-    dir_id = params[:uuid]
-    dir = @workspace.directory(dir_id)
-    if dir.exists?
-      render json: {status: :error, message: "already exists"}
-    else
-      dir.create
-      render json: {status: :ok, data: {uuid: dir_id}}
-    end
-  end
-
-  private
-
-  def find_workspace
-    user_id = params[:user_uuid]
-    user = StoreAgent::User.new(user_id)
-    @workspace = user.workspace(user_id)
+    service_root.create
+    render json: {status: :ok, data: {uid: params["service_uid"]}}
   end
 end

@@ -1,13 +1,10 @@
 class UsersController < ApplicationController
+  include StorageManager
+
+  before_action :validates_user_to_be_absent, only: %w(create)
+
   def create
-    user_id = params["uuid"]
-    user = StoreAgent::User.new(user_id)
-    workspace = user.workspace(user_id)
-    if workspace.exists?
-      render json: {status: :error, message: "already exists"}
-    else
-      workspace.create
-      render json: {status: :ok, data: {uuid: user_id}}
-    end
+    workspace.create
+    render json: {status: :ok, data: {uid: params["user_uid"]}}
   end
 end

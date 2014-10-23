@@ -1,83 +1,91 @@
 class StoragesController < ApplicationController
-  before_action :find_workspace
-  before_action :find_service_node
-  before_action :find_directory, only: %w(ls mkdir rmdir)
-  before_action :find_file, only: %w(show create destroy)
+  include StorageManager
+
+  before_action :validates_user_to_be_present
+  before_action :validates_service_to_be_present
+  before_action :validates_object_to_be_directory, only: %w(ls rmdir)
+  before_action :validates_object_to_be_file, only: %w(show destroy)
+  before_action :validates_object_to_be_absent, only: %w(mkdir)
+  before_action :validates_parent_to_be_present, only: %w(mkdir create)
 
   def ls
-    if @directory.exists?
-      render json: {status: :ok, data: {files: @directory.read}}
-    else
-      render json: {status: :error, message: "directory not found"}
-    end
+    render json: {status: :ok, data: {files: object.read}}
   end
 
   def mkdir
-    if @directory.exists?
-      render json: {status: :error, message: "already exists"}
-    else
-      @directory.create
-      render json: {status: :ok, data: {directory: @directory.path}}
-    end
+    directory.create
+    render json: {status: :ok, data: {directory: directory.path}}
   end
 
   def rmdir
-    if @directory.exists?
-      @directory.delete
-      render json: {status: :ok, data: {result: true}}
-    else
-      render json: {status: :error, message: "directory not found"}
-    end
+    object.delete
+    render json: {status: :ok, data: {result: true}}
   end
 
   def show
-    if @file.exists?
-      send_data @file.read
-    else
-      render json: {status: :error, message: "file not found"}
-    end
+    send_data object.read
   end
 
   # TODO check Content-Type header
   # TODO add extension
   def create
     file_body = request.raw_post
-    if @file.exists?
+    if file.exists?
       # TODO check params[:overwrite] true/false
-      @file.update(file_body)
+      file.update(file_body)
     else
-      @file.create(file_body)
+      file.create(file_body)
     end
-    render json: {status: :ok, data: {path: @file.path, size: @file.metadata.disk_usage}}
+    render json: {status: :ok, data: {path: file.path, size: file.metadata.disk_usage}}
   end
 
   def destroy
-    if @file.exists?
-      @file.delete
-      render json: {status: :ok, data: {result: true}}
-    else
-      render json: {status: :error, message: "file not found"}
-    end
+    object.delete
+    render json: {status: :ok, data: {result: true}}
   end
 
   private
 
-  def find_workspace
-    user_id = params[:user_uuid]
-    user = StoreAgent::User.new(user_id)
-    @workspace = user.workspace(user_id)
+  def object
+    @object ||= service_root.find_object(params[:path])
   end
 
-  def find_service_node
-    service_id = params[:service_uuid]
-    @service_node = @workspace.directory(service_id)
+  def directory
+    @directory ||= service_root.directory(params[:path])
   end
 
-  def find_directory
-    @directory = @service_node.directory(params[:path])
+  def file
+    @file ||= service_root.file(params[:path])
   end
 
-  def find_file
-    @file = @service_node.file(params[:path])
+  def validates_object_to_be_present
+    if !object.exists?
+      render json: {status: :error, message: "#{params[:path]} not found"}
+    end
+  end
+
+  def validates_object_to_be_absent
+    if object.exists?
+      render json: {status: :error, message: "#{params[:path]} is already exists"}
+    end
+  end
+
+  def validates_object_to_be_directory
+    if !object.directory?
+      render json: {status: :error, message: "#{params[:path]} is not directory"}
+    end
+  end
+
+  def validates_object_to_be_file
+    if object.file?
+      render json: {status: :error, message: "#{params[:path]} is directory"}
+    end
+  end
+
+  def validates_parent_to_be_present
+    parent = object.parent_directory
+    if !parent.exists?
+      render json: {status: :error, message: "directory #{parent.path} not exists"}
+    end
   end
 end

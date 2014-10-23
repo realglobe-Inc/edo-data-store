@@ -380,7 +380,7 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/fil
 
 ```sh
 # PUT/POST /users/:user_uid/services/:service_uid/file/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X PUT -H ... -d @- <<EOF
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X PUT -H ... --data-binary @- <<EOF
 (ファイルの中身)
 EOF
 > {

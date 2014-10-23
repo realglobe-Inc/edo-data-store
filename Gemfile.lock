@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:realglobe-Inc/store_agent.git
-  revision: 59e376b67265746d12ed045c655c935a5d35081e
+  revision: cf1595cfd96bca6c76e55fded7b0992e7efacd31
   specs:
     store_agent (0.7.0)
       oj
