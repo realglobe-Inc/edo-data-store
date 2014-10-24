@@ -11,21 +11,18 @@ class StatementsController < ApplicationController
   end
 
   def create
-    # TODO check user_id, service_id
-
     json_statement = request.raw_post
-    begin
-      Oj.load(json_statement)
-    rescue => e
-      render json: {status: :error, message: "invalid JSON"}, status: 400
-      return
-    end
     create_params = {
       user_uid: params[:user_uid],
       service_uid: params[:service_uid],
       json_statement: json_statement
     }
-    Statement.create(create_params)
-    render json: {status: :ok, data: {result: true}}, status: 201
+    statement = Statement.create(create_params)
+    if statement.errors.empty?
+      render json: {status: :ok, data: {result: true}}, status: 201
+    else
+      statement.errors.full_messages.each{|message| notifications << message}
+      render json: {status: :error, message: "invalid uid"}, status: 403
+    end
   end
 end
