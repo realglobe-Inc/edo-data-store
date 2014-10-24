@@ -1,5 +1,5 @@
 StoreAgent.configure do |c|
-  c.storage_root = "#{Rails.root}/tmp/store_agent"
+  c.storage_root = File.expand_path(GlobalSettings.personal_cloud_dir)
   c.version_manager = StoreAgent::VersionManager::RuggedGit
   c.storage_data_encoders = [] <<
     StoreAgent::DataEncoder::GzipEncoder.new <<

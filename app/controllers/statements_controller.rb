@@ -1,6 +1,11 @@
 class StatementsController < ApplicationController
+  include ContentTypeChecker
+  include ResponseJsonNotificationsAdder
+
+  before_action :require_content_type_json
+
   def index
-    statements = Statement.where(user_identifier: params[:user_uuid], service_identifier: params[:service_uuid])
+    statements = Statement.where(user_uid: params[:user_uid], service_uid: params[:service_uid])
     statement_objects = Oj.load("[#{statements.pluck(:json_statement).join(",")}]")
     render json: {status: :ok, data: {statements: statement_objects}}
   end
@@ -12,15 +17,15 @@ class StatementsController < ApplicationController
     begin
       Oj.load(json_statement)
     rescue => e
-      render json: {status: :error, message: "invalid JSON"}
+      render json: {status: :error, message: "invalid JSON"}, status: 400
       return
     end
     create_params = {
-      user_identifier: params[:user_uuid],
-      service_identifier: params[:service_uuid],
+      user_uid: params[:user_uid],
+      service_uid: params[:service_uid],
       json_statement: json_statement
     }
     Statement.create(create_params)
-    render json: {status: :ok, data: {result: true}}
+    render json: {status: :ok, data: {result: true}}, status: 201
   end
 end
