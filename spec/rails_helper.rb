@@ -1,5 +1,6 @@
 require "simplecov"
 require 'simplecov-rcov'
+SimpleCov.coverage_dir("tmp/coverage")
 SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
 SimpleCov.start "rails"
 
@@ -9,8 +10,6 @@ require 'spec_helper'
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
 require 'rspec/autorun'
-require 'capybara/rspec'
-require 'webmock/rspec'
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
@@ -52,14 +51,14 @@ RSpec.configure do |config|
 #  config.include Rails.application.routes.url_helpers
   Rails.application.routes.default_url_options = {:protocol => "http", :host => "test.host"}
 
+  config.before(:all) do
+    if File.exists?(StoreAgent.config.storage_root)
+      FileUtils.remove_dir(StoreAgent.config.storage_root)
+    end
+  end
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
-  end
-  config.after(:suite) do
-    if File.exists?(GlobalSettings.personal_cloud_dir)
-#      FileUtils.remove_dir(GlobalSettings.personal_cloud_dir)
-    end
   end
   config.before(:each) do
     DatabaseCleaner.start

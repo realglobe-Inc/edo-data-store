@@ -1,0 +1,29 @@
+<% (1..2).each do |i| %>
+  <% time = Time.now - i %>
+  statement_00<%= i %>:
+    user_uid: "user_001"
+    service_uid: "service_001"
+    json_statement: '<%= Oj.dump({number: i}) %>'
+    created_at: <%= time %>
+    updated_at: <%= time %>
+<% end %>
+
+<% (3..6).each do |i| %>
+  <% time = Time.now - i %>
+  statement_00<%= i %>:
+    user_uid: "user_001"
+    service_uid: "service_002"
+    json_statement: '<%= Oj.dump({number: i}) %>'
+    created_at: <%= time %>
+    updated_at: <%= time %>
+<% end %>
+
+<% (7..9).each do |i| %>
+  <% time = Time.now - i %>
+  statement_00<%= i %>:
+    user_uid: "user_002"
+    service_uid: "service_001"
+    json_statement: '<%= Oj.dump({number: i}) %>'
+    created_at: <%= time %>
+    updated_at: <%= time %>
+<% end %>
