@@ -10,16 +10,16 @@ Rails.application.routes.draw do
         # サービスから利用するAPI
         resources :directory, only: %w() do
           collection do
-            get "/(*path)" => "storages#ls"
-            match "/*path" => "storages#mkdir", via: %w(post put)
-            delete "/*path" => "storages#rmdir"
+            get "/(*path)" => "storages#list_files"
+            match "/(*path)" => "storages#make_directory", via: %w(post put)
+            delete "/(*path)" => "storages#remove_directory"
           end
         end
         resources :file, only: %w() do
           collection do
-            get "/*path" => "storages#show"
-            match "/*path" => "storages#create", via: %w(post put)
-            delete "/*path" => "storages#destroy"
+            get "/*path" => "storages#read_file"
+            match "/*path" => "storages#write_file", via: %w(post put)
+            delete "/*path" => "storages#remove_file"
           end
         end
         resources :statements, only: %w(index create)

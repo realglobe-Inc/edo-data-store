@@ -3,32 +3,32 @@ class StoragesController < ApplicationController
 
   before_action :validates_user_to_be_present
   before_action :validates_service_to_be_present
-  before_action :validates_object_to_be_directory, only: %w(ls rmdir)
-  before_action :validates_object_to_be_file, only: %w(show destroy)
-  before_action :validates_object_to_be_absent, only: %w(mkdir)
-  before_action :validates_parent_to_be_present, only: %w(mkdir create)
+  before_action :validates_object_to_be_directory, only: %w(list_files remove_directory)
+  before_action :validates_object_to_be_file, only: %w(read_file remove_file)
+  before_action :validates_object_to_be_absent, only: %w(make_directory)
+  before_action :validates_parent_to_be_present, only: %w(make_directory write_file)
 
-  def ls
+  def list_files
     render json: {status: :ok, data: {files: object.read}}
   end
 
-  def mkdir
+  def make_directory
     directory.create
     render json: {status: :ok, data: {directory: directory.path}}
   end
 
-  def rmdir
+  def remove_directory
     object.delete
     render json: {status: :ok, data: {result: true}}
   end
 
-  def show
+  def read_file
     send_data object.read
   end
 
   # TODO check Content-Type header
   # TODO add extension
-  def create
+  def write_file
     file_body = request.raw_post
     if file.exists?
       # TODO check params[:overwrite] true/false
@@ -39,7 +39,7 @@ class StoragesController < ApplicationController
     render json: {status: :ok, data: {path: file.path, size: file.metadata.disk_usage}}
   end
 
-  def destroy
+  def remove_file
     object.delete
     render json: {status: :ok, data: {result: true}}
   end
