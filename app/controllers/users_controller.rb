@@ -12,7 +12,7 @@ class UsersController < ApplicationController
     FileUtils.cd(StoreAgent.config.storage_root) do
       user_identifiers = Dir.glob("*", File::FNM_DOTMATCH)
     end
-    user_identifiers = (user_identifiers - StoreAgent.reserved_filenames).sort
+    user_identifiers = (user_identifiers - StoreAgent.reserved_filenames)
     render json: {status: :ok, data: {users: user_identifiers}}
   end
 

@@ -12,6 +12,34 @@ RSpec.describe ServicesController, :type => :controller do
     "user_001"
   end
 
+  context "GET /users/xxx/services" do
+    let :user_uid do
+      "user_002"
+    end
+    before do
+      user = StoreAgent::User.new(user_uid)
+      workspace = user.workspace(user_uid)
+      if workspace.exists?
+        workspace.delete
+      end
+      workspace.create
+    end
+    it "登録されているユーザーのUID一覧を返す" do
+      user = StoreAgent::User.new(user_uid)
+      workspace = user.workspace(user_uid)
+      service_identifiers = %w(service_001 service_002 service_foo service_bar)
+      service_identifiers.each do |uid|
+        workspace.directory(uid).create
+      end
+      get :index, {user_uid: user_uid}
+      expect(Oj.load(response.body)["data"]["services"].sort).to eq service_identifiers.sort
+    end
+    it "サービスが登録されていない場合、services は空配列" do
+      get :index, {user_uid: user_uid}
+      expect(Oj.load(response.body)["data"]["services"]).to eq []
+    end
+  end
+
   context "POST /users/xxx/services" do
     it "Content-Type が application/json でないと 403 エラーを返す" do
       request.headers["Content-Type"] = "text/html"
