@@ -5,6 +5,29 @@ RSpec.describe UsersController, :type => :controller do
     request.headers["Content-Type"] = "application/json"
   end
 
+  context "GET /users" do
+    before do
+      if File.exists?(StoreAgent.config.storage_root)
+        FileUtils.remove_dir(StoreAgent.config.storage_root)
+        FileUtils.mkdir(StoreAgent.config.storage_root)
+      end
+    end
+    it "登録されているユーザーのUID一覧を返す" do
+      user_identifiers = %w(user_001 user_002 user_foo user_bar).sort
+      user_identifiers.each do |uid|
+        user = StoreAgent::User.new(uid)
+        workspace = user.workspace(uid)
+        workspace.create
+      end
+      get :index
+      expect(Oj.load(response.body)["data"]["users"]).to eq user_identifiers
+    end
+    it "ユーザーが登録されていない場合、users は空配列" do
+      get :index
+      expect(Oj.load(response.body)["data"]["users"]).to eq []
+    end
+  end
+
   context "POST /users" do
     it "Content-Type が application/json でないと 403 エラーを返す" do
       request.headers["Content-Type"] = "text/html"
