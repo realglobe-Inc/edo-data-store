@@ -5,6 +5,7 @@ class ServicesController < ApplicationController
 
   before_action :require_content_type_json
   before_action :validates_user_to_be_present
+  before_action :validates_service_to_be_present, only: %w(destroy)
   before_action :validates_service_to_be_absent, only: %w(create)
 
   def index
@@ -14,5 +15,10 @@ class ServicesController < ApplicationController
   def create
     service_root.create
     render json: {status: :ok, data: {uid: params["service_uid"]}}, status: 201
+  end
+
+  def destroy
+    service_root.delete
+    render json: {status: :ok, data: {retult: true}}
   end
 end

@@ -62,4 +62,29 @@ RSpec.describe ServicesController, :type => :controller do
       expect_403_error(error_message: "service already exists")
     end
   end
+
+  context "DELETE /users/xxx/services/yyy" do
+    let :user_uid do
+      "user_del"
+    end
+    before :all do
+      user_uid = "user_del"
+      user = StoreAgent::User.new(user_uid)
+      workspace = user.workspace(user_uid)
+      workspace.create
+    end
+    it "サービスが削除される" do
+      service_uid = "service_del"
+      user = StoreAgent::User.new(user_uid)
+      workspace = user.workspace(user_uid)
+      workspace.directory(service_uid).create
+      delete :destroy, {user_uid: user_uid, service_uid: service_uid}
+      expect(response.status).to eq 200
+      expect(workspace.directory(workspace).exists?).to be false
+    end
+    it "サービスが存在しない場合、404 エラーを返す" do
+      delete :destroy, {user_uid: user_uid, service_uid: "dummy_service"}
+      expect_404_error(error_message: "service not found")
+    end
+  end
 end
