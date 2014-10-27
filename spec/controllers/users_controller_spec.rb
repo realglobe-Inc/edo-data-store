@@ -9,8 +9,8 @@ RSpec.describe UsersController, :type => :controller do
     before do
       if File.exists?(StoreAgent.config.storage_root)
         FileUtils.remove_dir(StoreAgent.config.storage_root)
-        FileUtils.mkdir(StoreAgent.config.storage_root)
       end
+      FileUtils.mkdir(StoreAgent.config.storage_root)
     end
     it "登録されているユーザーのUID一覧を返す" do
       user_identifiers = %w(user_001 user_002 user_foo user_bar).sort
@@ -48,6 +48,22 @@ RSpec.describe UsersController, :type => :controller do
       post :create, {user_uid: :fuga}
       post :create, {user_uid: :fuga}
       expect_403_error(error_message: "user already exists")
+    end
+  end
+
+  context "DELETE /users/xxx" do
+    it "ユーザーが削除される" do
+      uid = "user_del"
+      user = StoreAgent::User.new(uid)
+      workspace = user.workspace(uid)
+      workspace.create
+      delete :destroy, {user_uid: uid}
+      expect(response.status).to eq 200
+      expect(File.exists?("#{StoreAgent.config.storage_root}/#{uid}")).to be false
+    end
+    it "ユーザーが存在しない場合、404 エラーを返す" do
+      delete :destroy, {user_uid: "dummy_user"}
+      expect_404_error(error_message: "user not found")
     end
   end
 end
