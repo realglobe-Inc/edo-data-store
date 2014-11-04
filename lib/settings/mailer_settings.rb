@@ -1,0 +1,2 @@
+class MailerSettings < BasicSettings
+end

@@ -1,0 +1,21 @@
+development: &dev
+  mail_sender: &mail_sender "no-reply-edo-pc-dev@c4sa.jp"
+  action_mailer:
+    delivery_method: smtp
+    smtp_settings:
+      address: "127.0.0.1"
+      port: 25
+      domain: "ui-dev00.c4sa.jp"
+      enable_starttls_auto: false
+  exception_notification:
+    sender_address: *mail_sender
+    exception_recipients: "oku@realglobe.jp"
+
+production:
+  <<: *dev
+
+test:
+  <<: *dev
+  action_mailer:
+    delivery_method: test
+    smtp_settings:
