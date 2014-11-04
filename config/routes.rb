@@ -2,10 +2,10 @@ Rails.application.routes.draw do
   # API
   scope "v1", format: false do
     # ユーザー管理サーバーから利用するAPI
-    resources :users, only: %w(index show create update destroy), param: :user_uid
+    resources :users, only: %w(index create destroy), param: :user_uid
     resources :users, only: %w(), param: :uid do
       # 認証サーバーから利用するAPI
-      resources :services, only: %w(index show create update destroy), param: :service_uid
+      resources :services, only: %w(index create destroy), param: :service_uid
       resources :services, only: %w(), param: :uid do
         # サービスから利用するAPI
         resources :directory, only: %w() do

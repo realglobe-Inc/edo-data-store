@@ -11,7 +11,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141022065931) do
+ActiveRecord::Schema.define(version: 20141104080416) do
+
+  create_table "attachments", force: true do |t|
+    t.string   "sha2",                        null: false
+    t.binary   "content",    limit: 16777215, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "attachments", ["sha2"], name: "index_attachments_on_sha2", unique: true, using: :btree
 
   create_table "statements", force: true do |t|
     t.string   "user_uid",       null: false
