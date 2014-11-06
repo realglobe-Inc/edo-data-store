@@ -1,0 +1,2 @@
+git_repository: git@github.com:s-oku/edo-personal-cloud.git
+app_root: "{{ app_user_home }}/edo-personal-cloud"

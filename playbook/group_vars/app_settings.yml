@@ -1,0 +1,3 @@
+app_user: edo_pc
+app_user_home: /home/{{ app_user }}
+app_host: 192.168.33.12

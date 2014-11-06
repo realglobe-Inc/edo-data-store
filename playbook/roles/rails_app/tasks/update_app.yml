@@ -1,0 +1,8 @@
+- name: install gems
+  command: bundle install --path vendor/bundle chdir={{ app_root }}
+- name: create database.yml
+  template: src=database.yml.j2 dest={{ app_root }}/config/database.yml
+- name: create db
+  command: bundle exec rake db:create RAILS_ENV=development chdir={{ app_root }}
+- name: load schema
+  command: bundle exec rake db:schema:load RAILS_ENV=development chdir={{ app_root }}

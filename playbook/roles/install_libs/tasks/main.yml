@@ -1,0 +1,3 @@
+- name: install libraries
+  yum: name=emacs,git,gcc,gcc-c++,wget,openssl-devel,mysql-devel,cmake
+  when: (ansible_distribution == 'CentOS') and (ansible_distribution_version == '6.5')

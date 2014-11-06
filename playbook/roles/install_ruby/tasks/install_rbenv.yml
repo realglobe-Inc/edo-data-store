@@ -1,0 +1,17 @@
+- name: git clone rbenv
+  git:
+    repo=https://github.com/sstephenson/rbenv.git
+    dest={{ app_user_home }}/.rbenv
+    version={{ rbenv_version }}
+- name: add rbenv settings to .bashrc
+  lineinfile:
+    dest={{ app_user_home }}/.bashrc
+    line="{{ item.line }}"
+  with_items:
+    - line: 'export PATH=\"$HOME/.rbenv/bin:$PATH\"'
+    - line: 'eval \"$(rbenv init -)\"'
+- name: git clone ruby-build
+  git:
+    repo=https://github.com/sstephenson/ruby-build.git
+    dest={{ app_user_home }}/.rbenv/plugins/ruby-build
+    version={{ ruby_build_version }}

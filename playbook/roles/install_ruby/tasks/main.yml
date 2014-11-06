@@ -1,0 +1,18 @@
+- name: add .gemrc
+  lineinfile: >
+    dest={{ app_user_home }}/.gemrc
+    line='gem: --no-ri --no-rdoc'
+    state=present
+    create=yes
+- name: check rbenv
+  shell: which rbenv
+  register: check_rbenv
+  ignore_errors: true
+- include: install_rbenv.yml
+  when: check_rbenv|failed
+- name: set ruby version
+  command: rbenv global {{ ruby_version }}
+  register: set_ruby_version
+  ignore_errors: true
+- include: install_ruby.yml
+  when: set_ruby_version|failed

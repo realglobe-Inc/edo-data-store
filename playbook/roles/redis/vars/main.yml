@@ -1,0 +1,5 @@
+redis_version: 2.8.12
+redis_src_dir: "{{ app_user_home }}/src/redis"
+redis_install_dir: "{{ app_user_home }}/redis_{{ redis_version }}"
+redis_symlink_path: "{{ app_user_home }}/redis"
+redis_bin_dir: "{{ redis_symlink_path }}/bin"

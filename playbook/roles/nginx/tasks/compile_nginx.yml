@@ -1,0 +1,26 @@
+- name: configure nginx
+  command: >
+    ./configure
+    --prefix={{ nginx_install_dir }}
+    --with-openssl={{ lib_src_dir }}/openssl-{{ openssl_version }}
+    --with-http_ssl_module
+    --with-http_gzip_static_module
+    --with-http_realip_module
+    --with-http_spdy_module
+    --with-pcre={{ lib_src_dir }}/pcre-{{ pcre_version }}
+    --add-module={{ lib_src_dir }}/headers-more-nginx-module
+    chdir={{ nginx_src_dir }}
+- name: make nginx
+  command: make chdir={{ nginx_src_dir }}
+- name: make install nginx
+  command: make install chdir={{ nginx_src_dir }}
+- name: create symlink
+  file: src={{ nginx_install_dir }} path={{ nginx_symlink_path }} state=link force=yes
+- name: update nginx.conf
+  template: src=nginx.conf.j2 dest={{ nginx_symlink_path }}/conf/nginx.conf
+- name: make ssl_key directory
+  file: path={{ ssl_key_dir }} state=directory owner={{ app_user }} group={{ app_user }}
+- name: add ssl crt
+  copy: src=server.crt dest={{ ssl_crt_path }}
+- name: add ssl key
+  copy: src=server.key dest={{ ssl_key_path }}

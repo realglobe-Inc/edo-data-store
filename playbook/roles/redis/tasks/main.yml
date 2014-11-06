@@ -1,0 +1,7 @@
+- name: git clone redis
+  git: repo=https://github.com/antirez/redis.git dest={{ redis_src_dir }} version={{ redis_version }}
+  register: git_clone_redis
+- include: install_redis.yml
+  when: git_clone_redis.changed
+- name: start redis
+  command: "{{ redis_bin_dir }}/redis-server {{ redis_bin_dir }}/redis.conf"

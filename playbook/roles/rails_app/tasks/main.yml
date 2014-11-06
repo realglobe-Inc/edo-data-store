@@ -1,0 +1,17 @@
+- name: copy id_rsa_github
+  copy: src=~/.ssh/id_rsa_github dest={{ app_user_home }}/.ssh/id_rsa owner={{ app_user }} group={{ app_user }} mode=600
+- name: git clone app
+  git: repo={{ git_repository }} dest={{ app_root }} version=development accept_hostkey=yes
+  register: git_clone_app
+- include: update_app.yml
+  when: git_clone_app.changed
+- name: check god
+  command: bundle exec god status -p 17165 chdir={{ app_root }}
+  register: check_god
+  ignore_errors: true
+- name: start unicorn
+  command: env RAILS_ENV=development GOD_PORT=17165 ./script/unicorn.sh start chdir={{ app_root }}
+  when: check_god|failed
+- name: reload unicorn
+  shell: echo "" | env RAILS_ENV=development GOD_PORT=17165 ./script/unicorn.sh reload chdir={{ app_root }}
+  when: check_god|success

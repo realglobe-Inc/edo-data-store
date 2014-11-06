@@ -1,0 +1,15 @@
+lib_src_dir: "{{ app_user_home }}/src"
+nginx_src_dir: "{{ lib_src_dir }}/nginx-{{ nginx_version }}"
+nginx_install_dir: "{{ app_user_home }}/nginx_{{ nginx_version }}"
+nginx_symlink_path: "{{ app_user_home }}/nginx"
+nginx_version: 1.7.2
+openssl_version: 1.0.1h
+headers_more_module_version: v0.25
+pcre_version: 8.36
+
+app_hostname: dev.edo-pds.jp
+app_public_root: "{{ app_root }}/public"
+app_socket_path: "{{ app_root }}/tmp/sockets/rails.sock"
+ssl_key_dir: "{{ app_user_home }}/private"
+ssl_crt_path: "{{ ssl_key_dir }}/server.crt"
+ssl_key_path: "{{ ssl_key_dir }}/server.key"

@@ -1,0 +1,8 @@
+- name: make redis
+  command: make chdir={{ redis_src_dir }}
+- name: make install redis
+  command: make install PREFIX={{ redis_install_dir }} chdir={{ redis_src_dir }}
+- name: create symlink
+  file: src={{ redis_install_dir }} path={{ redis_symlink_path }} state=link force=yes
+- name: copy redis.conf
+  copy: src=redis.conf dest={{ redis_bin_dir }}/redis.conf
