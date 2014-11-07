@@ -93,6 +93,7 @@
 - name: make install lua-openssl
   command: make install PREFIX={{ luajit_install_dir }} chdir={{ lua_openssl_src_dir }}
   when: git_clone_lua_openssl.changed
+  ignore_errors: true
 - name: git clone ngx_devel_kit
   git: repo=https://github.com/simpl/ngx_devel_kit.git
     dest={{ ngx_devel_kit_src_dir }}
