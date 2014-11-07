@@ -1,0 +1,103 @@
+- include_vars: lua_module.yml
+- name: make lib directory
+  file: path={{ lib_install_dir }} state=directory owner={{ app_user }} group={{ app_user }}
+- name: download LuaJIT tar archive
+  get_url: url=http://luajit.org/download/{{ luajit_tar_archive_filename }} dest={{ lib_src_dir }}/{{ luajit_tar_archive_filename }}
+  register: wget_luajit
+- name: unpack LuaJIT tar archive
+  command: tar zxf {{ luajit_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_luajit.changed
+- name: make LuaJIT
+  command: make PREFIX={{ luajit_install_dir }} chdir={{ luajit_src_dir }}
+  when: wget_luajit.changed
+- name: make install LuaJIT
+  shell: PATH=$PATH:/sbin make install PREFIX={{ luajit_install_dir }} chdir={{ luajit_src_dir }}
+  when: wget_luajit.changed
+- name: git clone lua-resty-redis
+  git: repo=https://github.com/openresty/lua-resty-redis.git
+    dest={{ lib_src_dir }}/lua-resty-redis
+    version={{ lua_resty_redis_version }}
+  register: git_clone_lua_resty_redis
+- name: cp lib/resty to luajit
+  command: cp -rf {{ lib_src_dir }}/lua-resty-redis/lib/resty {{ luajit_install_dir }}/share/lua/5.1/
+  when: git_clone_lua_resty_redis.changed
+- name: git clone lua-cjson
+  git: repo=https://github.com/mpx/lua-cjson.git
+    dest={{ lua_cjson_src_dir }}
+    version={{ lua_cjson_version }}
+  register: git_clone_lua_cjson
+- name: make lua-cjson
+  command: make CFLAGS=-I{{ luajit_src_dir }}/src chdir={{ lua_cjson_src_dir }}
+  when: git_clone_lua_cjson.changed
+- name: make install lua-cjson
+  command: make install PREFIX={{ luajit_install_dir }} chdir={{ lua_cjson_src_dir }}
+  when: git_clone_lua_cjson.changed
+- name: download cmake tar archive
+  get_url: url=http://www.cmake.org/files/v3.0/{{ cmake_tar_archive_filename }} dest={{ lib_src_dir }}/{{ cmake_tar_archive_filename }}
+  register: wget_cmake
+- name: unpack cmake tar archive
+  command: tar zxf {{ cmake_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_cmake.changed
+- name: configure cmake
+  command: ./configure chdir={{ cmake_src_dir }}
+  when: wget_cmake.changed
+- name: make cmake
+  command: make chdir={{ cmake_src_dir }}
+  when: wget_cmake.changed
+- name: download curl tar archive
+  get_url: url=http://curl.haxx.se/download/{{ curl_tar_archive_filename }} dest={{ lib_src_dir }}/{{ curl_tar_archive_filename }}
+  register: wget_curl
+- name: unpack curl tar archive
+  command: tar zxf {{ curl_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_curl.changed
+- name: configure curl
+  command: ./configure --prefix={{ curl_install_dir }} chdir={{ curl_src_dir }}
+  when: wget_curl.changed
+- name: make curl
+  command: make chdir={{ curl_src_dir }}
+  when: wget_curl.changed
+- name: make install curl
+  command: make install chdir={{ curl_src_dir }}
+  when: wget_curl.changed
+- name: git clone lua-curl
+  git: repo=https://github.com/msva/lua-curl.git
+    dest={{ lua_curl_src_dir }}
+    version={{ lua_curl_version }}
+  register: git_clone_lua_curl
+- name: cmake lua-curl
+  shell: CMAKE_PREFIX_PATH={{ curl_install_dir }} LUA_DIR={{ luajit_install_dir }} {{ cmake_src_dir }}/bin/cmake -DUSE_LUAJIT=ON chdir={{ lua_curl_src_dir }}
+  when: git_clone_lua_curl.changed
+- name: make lua-curl
+  command: make C_FLAGS="-O3 -fPIC -I{{ luajit_install_dir }}/include/luajit-2.0 -I{{ curl_install_dir }}/include -L{{ curl_install_dir }}/lib" chdir={{ lua_curl_src_dir }}
+  when: git_clone_lua_curl.changed
+- name: make install lua-curl
+  command: make install chdir={{ lua_curl_src_dir }}
+  when: git_clone_lua_curl.changed
+- name: configure openssl
+  command: ./config --prefix={{ openssl_install_dir }}/ssl -fPIC shared zlib-dynamic threads chdir={{ openssl_src_dir }}
+  when: wget_openssl.changed
+- name: make openssl
+  command: make chdir={{ openssl_src_dir }}
+  when: wget_openssl.changed
+- name: make install openssl
+  command: make install chdir={{ openssl_src_dir }}
+  when: wget_openssl.changed
+- name: git clone lua-openssl
+  git: repo=https://github.com/zhaozg/lua-openssl.git
+    dest={{ lua_openssl_src_dir }}
+    version={{ lua_openssl_version }}
+  register: git_clone_lua_openssl
+- name: make lua-openssl
+  command: make PREFIX={{ openssl_install_dir }} CFLAGS="-I{{ luajit_src_dir }}/src -DPTHREADS" chdir={{ lua_openssl_src_dir }}
+  when: git_clone_lua_openssl.changed
+- name: make install lua-openssl
+  command: make install PREFIX={{ luajit_install_dir }} chdir={{ lua_openssl_src_dir }}
+  when: git_clone_lua_openssl.changed
+- name: git clone ngx_devel_kit
+  git: repo=https://github.com/simpl/ngx_devel_kit.git
+    dest={{ ngx_devel_kit_src_dir }}
+    version={{ ngx_devel_kit_version }}
+- name: git clone lua-nginx-module
+  git: repo=https://github.com/openresty/lua-nginx-module.git
+    dest={{ lua_nginx_module_src_dir }}
+    version={{ lua_nginx_module_version }}

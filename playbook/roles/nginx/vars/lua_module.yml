@@ -1,0 +1,26 @@
+lib_install_dir: "{{ app_user_home }}/lib"
+
+luajit_src_dir: "{{ lib_src_dir }}/LuaJIT-{{ luajit_version }}"
+luajit_install_dir: "{{ lib_install_dir }}/LuaJIT-{{ luajit_version }}"
+lua_cjson_src_dir: "{{ lib_src_dir }}/lua-cjson"
+cmake_src_dir: "{{ lib_src_dir }}/cmake-{{ cmake_version }}"
+curl_src_dir: "{{ lib_src_dir }}/curl-{{ curl_version }}"
+curl_install_dir: "{{ lib_install_dir }}/curl-{{ curl_version }}"
+lua_curl_src_dir: "{{ lib_src_dir }}/lua-curl"
+openssl_src_dir: "{{ lib_src_dir }}/openssl-{{ openssl_version }}"
+openssl_install_dir: "{{ lib_install_dir }}/openssl-{{ openssl_version }}"
+lua_openssl_src_dir: "{{ lib_src_dir }}/lua-openssl"
+ngx_devel_kit_src_dir: "{{ lib_src_dir }}/ngx_devel_kit"
+lua_nginx_module_src_dir: "{{ lib_src_dir }}/lua-nginx-module"
+luajit_version: 2.0.3
+lua_resty_redis_version: c49ba7c
+lua_cjson_version: 2.1.0
+cmake_version: 3.0.0
+curl_version: 7.37.1
+lua_curl_version: HEAD
+lua_openssl_version: 1d5c3be
+ngx_devel_kit_version: v0.2.19
+lua_nginx_module_version: v0.9.9
+luajit_tar_archive_filename: LuaJIT-{{ luajit_version }}.tar.gz
+cmake_tar_archive_filename: cmake-{{ cmake_version }}.tar.gz
+curl_tar_archive_filename: curl-{{ curl_version }}.tar.gz

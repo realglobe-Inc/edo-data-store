@@ -1,5 +1,8 @@
 - name: configure nginx
-  command: >
+  shell: >
+    {% if install_lua == "true" %}
+    LUAJIT_LIB={{ luajit_install_dir }}/lib LUAJIT_INC={{ luajit_install_dir }}/include/luajit-2.0
+    {% endif %}
     ./configure
     --prefix={{ nginx_install_dir }}
     --with-openssl={{ lib_src_dir }}/openssl-{{ openssl_version }}
@@ -9,6 +12,11 @@
     --with-http_spdy_module
     --with-pcre={{ lib_src_dir }}/pcre-{{ pcre_version }}
     --add-module={{ lib_src_dir }}/headers-more-nginx-module
+    {% if install_lua == "true" %}
+    --with-ld-opt="-Wl,-rpath={{ luajit_install_dir }}/lib"
+    --add-module={{ ngx_devel_kit_src_dir }}
+    --add-module={{ lua_nginx_module_src_dir }}
+    {% endif %}
     chdir={{ nginx_src_dir }}
 - name: make nginx
   command: make chdir={{ nginx_src_dir }}
