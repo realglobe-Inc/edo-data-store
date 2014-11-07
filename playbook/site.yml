@@ -1,2 +1,2 @@
-- include: app.yml
 - include: db.yml
+- include: app.yml
