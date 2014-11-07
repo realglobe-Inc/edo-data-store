@@ -4,4 +4,4 @@
 - include: install_redis.yml
   when: git_clone_redis.changed
 - name: start redis
-  command: "{{ redis_bin_dir }}/redis-server {{ redis_bin_dir }}/redis.conf" chdir={{ redis_bin_dir }}
+  command: "{{ redis_bin_dir }}/redis-server {{ redis_bin_dir }}/redis.conf chdir={{ redis_bin_dir }}"
