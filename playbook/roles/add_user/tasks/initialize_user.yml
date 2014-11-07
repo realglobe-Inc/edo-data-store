@@ -1,3 +1,5 @@
+- name: add wheel group
+  user: name={{ app_user }} append=yes groups=wheel
 - name: add sudoers
   lineinfile: >
     dest=/etc/sudoers

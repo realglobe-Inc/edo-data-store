@@ -1,5 +1,5 @@
 - name: add user
-  user: name={{ app_user }} groups={{ app_user }},wheel state=present
+  user: name={{ app_user }} state=present
   register: add_user
 - include: initialize_user.yml
   when: add_user.changed
