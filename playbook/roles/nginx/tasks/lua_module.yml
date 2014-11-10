@@ -89,11 +89,11 @@
   register: git_clone_lua_openssl
 - name: make lua-openssl
   command: make PREFIX={{ openssl_install_dir }} CFLAGS="-I{{ luajit_src_dir }}/src -DPTHREADS" chdir={{ lua_openssl_src_dir }}
+  ignore_errors: true
   when: git_clone_lua_openssl.changed
 - name: make install lua-openssl
   command: make install PREFIX={{ luajit_install_dir }} chdir={{ lua_openssl_src_dir }}
   when: git_clone_lua_openssl.changed
-  ignore_errors: true
 - name: git clone ngx_devel_kit
   git: repo=https://github.com/simpl/ngx_devel_kit.git
     dest={{ ngx_devel_kit_src_dir }}
