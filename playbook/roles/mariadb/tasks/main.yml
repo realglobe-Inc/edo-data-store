@@ -1,9 +1,9 @@
 - name: set yum repository for the mariadb
-  copy: src=mariadb.repo dest=/etc/yum.repos.d/mariadb.repo mode=0644 owner=root group=root
+  template: src=mariadb.repo.j2 dest=/etc/yum.repos.d/mariadb.repo mode=0644 owner=root group=root
 - name: remove mysql-libs
   yum: name=mysql-libs state=absent
 - name: install mariadb
-  yum: name=MariaDB-server-10.1.0-1.el6 state=present enablerepo=mariadb
+  yum: name=MariaDB-server state=present enablerepo=mariadb
 - name: copy my.cnf
   command: cp /usr/share/mysql/my-large.cnf /etc/my.cnf.d/
 - name: copy server.cnf

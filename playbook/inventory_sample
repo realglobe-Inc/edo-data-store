@@ -2,6 +2,9 @@
 192.168.33.12
 [app:vars]
 remote_user=vagrant
+install_lua=true
 
 [db]
 192.168.33.13
+[db:vars]
+remote_user=vagrant

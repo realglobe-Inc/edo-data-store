@@ -1,4 +1,5 @@
 - hosts: db
+  remote_user: "{{ remote_user }}"
   sudo: yes
 #  gather_facts: no
   roles:
