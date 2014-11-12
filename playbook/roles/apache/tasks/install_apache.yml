@@ -1,0 +1,86 @@
+- name: download APR tar archive
+  get_url: url=http://ftp.yz.yamagata-u.ac.jp/pub/network/apache//apr/{{ apr_tar_archive_filename }} dest={{ lib_src_dir }}/{{ apr_tar_archive_filename }}
+  register: wget_apr
+- name: unpack APR tar archive
+  command: tar zxf {{ apr_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_apr.changed
+- name: configure APR
+  command: ./configure --prefix={{ apr_install_dir }} chdir={{ apr_src_dir }}
+  when: wget_apr.changed
+- name: make APR
+  command: make chdir={{ apr_src_dir }}
+  when: wget_apr.changed
+- name: make install APR
+  command: make install chdir={{ apr_src_dir }}
+  when: wget_apr.changed
+- name: download APR-util tar archive
+  get_url: url=http://ftp.yz.yamagata-u.ac.jp/pub/network/apache//apr/{{ apr_util_tar_archive_filename }} dest={{ lib_src_dir }}/{{ apr_util_tar_archive_filename }}
+  register: wget_apr_util
+- name: unpack APR-util tar archive
+  command: tar zxf {{ apr_util_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_apr_util.changed
+- name: configure APR-util
+  command: ./configure --prefix={{ apr_util_install_dir }} --with-apr={{ apr_install_dir }} chdir={{ apr_util_src_dir }}
+  when: wget_apr_util.changed
+- name: make APR-util
+  command: make chdir={{ apr_util_src_dir }}
+  when: wget_apr_util.changed
+- name: make install APR-util
+  command: make install chdir={{ apr_util_src_dir }}
+  when: wget_apr_util.changed
+- name: download apache tar archive
+  get_url: url=http://ftp.riken.jp/net/apache//httpd/{{ apache_tar_archive_filename }} dest={{ lib_src_dir }}/{{ apache_tar_archive_filename }}
+  register: wget_apache
+- name: unpack apache tar archive
+  command: tar zxf {{ apache_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_apache.changed
+- name: configure apache
+  shell: >
+    {% if install_lua == "true" %}
+    LUA_LIBS="-L{{ luajit_install_dir }}/lib -lluajit-5.1"
+    LUA_CFLAGS="-I{{ luajit_install_dir }}/include/luajit-2.0"
+    LDFLAGS="-Wl,-rpath={{ luajit_install_dir }}/lib,-rpath={{ openssl_install_dir }}/ssl/lib"
+    {% endif %}
+    ./configure
+    --prefix={{ apache_install_dir }}
+    --with-apr={{ apr_install_dir }}
+    --with-apr-util={{ apr_util_install_dir }}
+    --with-ssl={{ openssl_install_dir }}/ssl
+    --with-pcre={{ pcre_install_dir }}
+    {% if install_lua == "true" %}
+    --enable-lua
+    --enable-luajit
+    {% endif %}
+    chdir={{ apache_src_dir }}
+  when: wget_apache.changed
+- name: make apache
+  command: make chdir={{ apache_src_dir }}
+  when: wget_apache.changed
+- name: make install apache
+  command: make install chdir={{ apache_src_dir }}
+  when: wget_apache.changed
+- name: create symlink
+  file: src={{ apache_install_dir }} path={{ apache_symlink_path }} state=link force=yes
+- name: set apache user
+  lineinfile: dest={{ apache_symlink_path }}/conf/httpd.conf regexp="^User" line="User {{ app_user }}"
+- name: set apache group
+  lineinfile: dest={{ apache_symlink_path }}/conf/httpd.conf regexp="^Group" line="Group {{ app_user }}"
+- name: enable mod_lua
+  lineinfile: dest={{ apache_symlink_path }}/conf/httpd.conf regexp="^#LoadModule lua_module modules/mod_lua.so" line="LoadModule lua_module modules/mod_lua.so" state=present backrefs=true
+  when: "install_lua == 'true'"
+- name: enable mod_socache_shmcb
+  lineinfile: dest={{ apache_symlink_path }}/conf/httpd.conf regexp="^#LoadModule socache_shmcb_module modules/mod_socache_shmcb.so" line="LoadModule socache_shmcb_module modules/mod_socache_shmcb.so" state=present backrefs=true
+- name: enable mod_ssl
+  lineinfile: dest={{ apache_symlink_path }}/conf/httpd.conf regexp="^#LoadModule ssl_module modules/mod_ssl.so" line="LoadModule ssl_module modules/mod_ssl.so" state=present backrefs=true
+- name: include httpd-ssl.conf
+  lineinfile: dest={{ apache_symlink_path }}/conf/httpd.conf regexp="#Include conf/extra/httpd-ssl.conf" line="Include conf/extra/httpd-ssl.conf" state=present backrefs=true
+- name: set ssl_crt path
+  lineinfile: dest={{ apache_symlink_path }}/conf/extra/httpd-ssl.conf regexp="^SSLCertificateFile" line='SSLCertificateFile "{{ ssl_crt_path }}"'
+- name: set ssl_key path
+  lineinfile: dest={{ apache_symlink_path }}/conf/extra/httpd-ssl.conf regexp="^SSLCertificateKeyFile" line='SSLCertificateKeyFile "{{ ssl_key_path }}"'
+- name: make ssl_key directory
+  file: path={{ ssl_key_dir }} state=directory owner={{ app_user }} group={{ app_user }}
+- name: add ssl crt
+  copy: src=server.crt dest={{ ssl_crt_path }}
+- name: add ssl key
+  copy: src=server.key dest={{ ssl_key_path }}

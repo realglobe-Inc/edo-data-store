@@ -14,6 +14,7 @@
     - install_ruby
     - rails_app
     - redis
+    #- apache
     - nginx
   vars_files:
     - group_vars/app_settings.yml
