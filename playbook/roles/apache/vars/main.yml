@@ -26,3 +26,4 @@ pcre_tar_archive_filename: pcre-{{ pcre_version }}.tar.gz
 ssl_key_dir: "{{ app_user_home }}/private"
 ssl_crt_path: "{{ ssl_key_dir }}/server.crt"
 ssl_key_path: "{{ ssl_key_dir }}/server.key"
+apache_init_script: /etc/init.d/httpd

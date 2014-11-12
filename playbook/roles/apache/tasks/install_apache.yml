@@ -84,3 +84,27 @@
   copy: src=server.crt dest={{ ssl_crt_path }}
 - name: add ssl key
   copy: src=server.key dest={{ ssl_key_path }}
+
+- name: copy init script
+  command: cp {{ apache_src_dir }}/build/rpm/httpd.init {{ apache_init_script }}
+  sudo: true
+- name: set pidfile path
+  lineinfile: >
+    dest={{ apache_init_script }}
+    regexp="^# pidfile"
+    line="# pidfile: {{ apache_symlink_path }}/logs/httpd.pid"
+    state=present
+    backrefs=true
+  sudo: true
+- name: set pidfile path
+  lineinfile: dest={{ apache_init_script }} regexp="^pidfile=" line="pidfile={{ apache_symlink_path }}/logs/httpd.pid" state=present backrefs=true
+  sudo: true
+- name: set httpd path
+  lineinfile: dest={{ apache_init_script }} regexp="^httpd=" line="httpd={{ apache_symlink_path }}/bin/httpd" state=present backrefs=true
+  sudo: true
+- name: set conffile path
+  lineinfile: dest={{ apache_init_script }} regexp="CONFFILE=" line="        CONFFILE={{ apache_symlink_path }}/conf/httpd.conf" state=present backrefs=true
+  sudo: true
+- name: chkconfig add
+  command: chkconfig --add httpd
+  sudo: true

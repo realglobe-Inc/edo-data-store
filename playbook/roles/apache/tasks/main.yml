@@ -36,5 +36,5 @@
   when: "install_lua == 'true'"
 - include: install_apache.yml
 - name: start apache
-  command: "{{ apache_symlink_path }}/bin/httpd"
+  service: name=httpd state=started enabled=yes
   sudo: true
