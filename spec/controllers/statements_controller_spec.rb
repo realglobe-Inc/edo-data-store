@@ -84,7 +84,16 @@ RSpec.describe StatementsController, :type => :controller do
         attachments.each do |attachment|
           attachment[:sha2] = OpenSSL::Digest.hexdigest("sha256", attachment[:content_body])
         end
-        properties = {actor: "I", verb: "Did", object: "This", attachments: attachments.map{|a| a[:sha2]}}
+        attachment_properties = attachments.map do |attachment|
+          {
+            usageType: "http://example.com/test/attachment",
+            display: {"en-US" => "A test attachment"},
+            contentType: attachment[:content_type],
+            content_type: attachment[:content_body].length,
+            sha2: attachment[:sha2]
+          }
+        end
+        properties = {actor: "I", verb: "Did", object: "This", attachments: attachment_properties}
         body = [] <<
           "--#{@boundary}" <<
           "Content-Type: application/json" <<

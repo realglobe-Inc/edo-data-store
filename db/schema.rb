@@ -14,8 +14,9 @@
 ActiveRecord::Schema.define(version: 20141104080416) do
 
   create_table "attachments", force: true do |t|
-    t.string   "sha2",                        null: false
-    t.binary   "content",    limit: 16777215, null: false
+    t.string   "sha2",                          null: false
+    t.string   "content_type"
+    t.binary   "content",      limit: 16777215, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end

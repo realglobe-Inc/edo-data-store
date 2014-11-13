@@ -1,10 +1,16 @@
 class StatementsController < ApplicationController
   include ResponseJsonNotificationsAdder
+  include StatementBuilder
 
   def index
     statements = Statement.where(user_uid: params[:user_uid], service_uid: params[:service_uid])
-    statements_properties = Oj.load("[#{statements.pluck(:json_statement).join(",")}]")
-    render json: {status: :ok, data: {statements: statements_properties}}
+    statement_hashsums = statements.map(&:attachment_hashsums).flatten.compact
+    if statement_hashsums.present?
+      content_type, response_body = build_multipart_statement_response(statements, statement_hashsums)
+      send_data response_body, type: content_type, disposition: :inline
+    else
+      render json: {status: :ok, data: {statements: statements.map(&:properties)}}
+    end
   end
 
   def create

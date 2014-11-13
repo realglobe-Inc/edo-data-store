@@ -31,54 +31,58 @@ class Statement < ActiveRecord::Base
   before_validation :set_properties, :dump_properties
   #  before_save :validates_user_to_be_present, :validates_service_to_be_present, on: :create
 
+  class << self
+    def create_simple(user_uid: nil, service_uid: nil, raw_body: "")
+      Statement.create(build_params(user_uid: user_uid, service_uid: service_uid, json_object: Oj.load(raw_body)))
+    end
+
+    def parse_params(raw_message)
+      raw_header, body = raw_message.split("#{CRLF}#{CRLF}")
+      headers = raw_header.split("#{CRLF}")
+      [headers, body]
+    end
+
+    def create_mixed(user_uid: nil, service_uid: nil, raw_body: "", content_type: "multipart/mixed")
+      content_type =~ /boundary=(#{BOUNDARY_REGEXP})/
+      boundary = $1
+      parts = raw_body.split(/(?:#{CRLF})?--#{boundary}(?:#{CRLF}|--)/).reject(&:blank?)
+      statement_string = parts.shift
+      statement_headers, statement_body = parse_params(statement_string)
+      create_params = build_params(user_uid: user_uid, service_uid: service_uid, json_object: Oj.load(statement_body))
+      statement = Statement.new(create_params)
+      attachments = parts.map do |attachment_string|
+        attachment_headers, attachment_body = parse_params(attachment_string)
+        Attachment.build_multipart_attachment(statement: statement, headers: attachment_headers, body: attachment_body)
+      end
+      begin
+        Statement.transaction do
+          statement.save!
+          attachments.each(&:save!)
+        end
+      rescue => e
+        logger.info e.inspect
+      end
+      statement
+    end
+
+    def build_params(user_uid: nil, service_uid: nil, json_object: nil)
+      PROPERTY_NAMES.inject({user_uid: user_uid, service_uid: service_uid}) do |properties, property_name|
+        if json_object.has_key?(property_name)
+          properties["#{property_name}_property"] = json_object[property_name]
+        end
+        properties
+      end
+    end
+  end
+
   def properties
-    @properties ||= {}
+    @properties ||= (json_statement? ? Oj.load(json_statement) : {})
   end
 
-  def self.create_simple(user_uid: nil, service_uid: nil, raw_body: "")
-    Statement.create(build_params(user_uid: user_uid, service_uid: service_uid, json_object: Oj.load(raw_body)))
-  end
-
-  def self.parse_params(raw_message)
-    raw_header, body = raw_message.split("#{CRLF}#{CRLF}")
-    headers = raw_header.split("#{CRLF}")
-    [headers, body]
-  end
-
-  def self.create_mixed(user_uid: nil, service_uid: nil, raw_body: "", content_type: "multipart/mixed")
-    content_type =~ /boundary=(#{BOUNDARY_REGEXP})/
-    boundary = $1
-    parts = raw_body.split(/(?:#{CRLF})?--#{boundary}(?:#{CRLF}|--)/).reject(&:blank?)
-    statement_string = parts.shift
-    statement_headers, statement_body = parse_params(statement_string)
-    create_params = build_params(user_uid: user_uid, service_uid: service_uid, json_object: Oj.load(statement_body))
-    statement = Statement.new(create_params)
-    attachments = parts.map do |attachment_string|
-      attachment_headers, attachment_body = parse_params(attachment_string)
-      sha2_header = attachment_headers.find{|h| h.start_with?("#{SHA2_HASH_HEADER_NAME}:")}
-      sha2_header =~ /#{SHA2_HASH_HEADER_NAME}:\s*(#{BOUNDARY_REGEXP})/
-      sha2 = $1
-      content = attachment_body
-      Attachment.new(sha2: sha2, content: content)
-    end
-    begin
-      Statement.transaction do
-        statement.save!
-        attachments.each(&:save!)
-      end
-    rescue => e
-      logger.info e.inspect
-    end
-    statement
-  end
-
-  def self.build_params(user_uid: nil, service_uid: nil, json_object: nil)
-    PROPERTY_NAMES.inject({user_uid: user_uid, service_uid: service_uid}) do |properties, property_name|
-      if json_object.has_key?(property_name)
-        properties["#{property_name}_property"] = json_object[property_name]
-      end
-      properties
-    end
+  def attachment_hashsums
+    properties["attachments"].map{|a| a["sha2"]}
+  rescue
+    nil
   end
 
   private
