@@ -10,10 +10,40 @@ RSpec.describe StatementsController, :type => :controller do
   end
 
   context "GET /users/xxx/services/yyy/statements" do
-    it "user_uid, service_uid が一致する statement の一覧を返す" do
-      get :index, {user_uid: "user_001", service_uid: "service_001"}
-      expect(response.status).to eq 200
-      expect(Oj.load(response.body)["data"]["statements"].length).to eq 2
+    context "添付ファイルがない場合" do
+      it "user_uid, service_uid が一致する statement の一覧を返す" do
+        get :index, {user_uid: "user_001", service_uid: "service_001"}
+        expect(response.status).to eq 200
+        expect(response.content_type).to eq "application/json"
+        expect(Oj.load(response.body)["data"]["statements"].length).to eq 2
+      end
+    end
+    context "添付ファイルがある場合" do
+      before do
+        binary_string = open("#{Rails.root}/tmp/rg-logo.png", "rb").read
+        sha2 = OpenSSL::Digest.hexdigest("sha256", binary_string)
+        img_attachment = {
+          usageType: "http://example.com/test/attachment",
+          display: {"en-US" => "A test attachment"},
+          contentType: "image/png",
+          length: binary_string.length,
+          sha2: sha2
+        }
+        json_object = {
+          "actor" => "I",
+          "verb" => "did",
+          "object" => "this",
+          "attachments" => [img_attachment]
+        }
+        st = Statement.create(Statement::build_params(user_uid: "user_002", service_uid: "service_002", json_object: json_object))
+        Attachment.create(sha2: sha2, content: binary_string, content_type: "image/png")
+      end
+
+      it "multipart/mixed 形式で返す" do
+        get :index, {user_uid: "user_002", service_uid: "service_002"}
+        expect(response.status).to eq 200
+        expect(response.content_type).to match "multipart/mixed; boundary=#{Statement::BOUNDARY_REGEXP}"
+      end
     end
   end
 
@@ -89,7 +119,7 @@ RSpec.describe StatementsController, :type => :controller do
             usageType: "http://example.com/test/attachment",
             display: {"en-US" => "A test attachment"},
             contentType: attachment[:content_type],
-            content_type: attachment[:content_body].length,
+            length: attachment[:content_body].length,
             sha2: attachment[:sha2]
           }
         end

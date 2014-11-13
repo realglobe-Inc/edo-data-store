@@ -18,6 +18,6 @@ module StatementBuilder
     end
     body << "--#{boundary}--"
     response_body = body.join("\r\n")
-    ["multipart/mixed: boundary=#{boundary}", response_body]
+    ["multipart/mixed; boundary=#{boundary}", response_body]
   end
 end
