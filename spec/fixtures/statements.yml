@@ -3,7 +3,7 @@
   statement_00<%= i %>:
     user_uid: "user_001"
     service_uid: "service_001"
-    json_statement: '<%= Oj.dump({number: i}) %>'
+    json_statement: '<%= Oj.dump({actor: "i", verb: "am", object: i}) %>'
     created_at: <%= time %>
     updated_at: <%= time %>
 <% end %>
@@ -13,7 +13,7 @@
   statement_00<%= i %>:
     user_uid: "user_001"
     service_uid: "service_002"
-    json_statement: '<%= Oj.dump({number: i}) %>'
+    json_statement: '<%= Oj.dump({actor: "i", verb: "am", object: i}) %>'
     created_at: <%= time %>
     updated_at: <%= time %>
 <% end %>
@@ -23,7 +23,7 @@
   statement_00<%= i %>:
     user_uid: "user_002"
     service_uid: "service_001"
-    json_statement: '<%= Oj.dump({number: i}) %>'
+    json_statement: '<%= Oj.dump({actor: "i", verb: "am", object: i}) %>'
     created_at: <%= time %>
     updated_at: <%= time %>
 <% end %>
