@@ -14,6 +14,7 @@ Bundler.require(*Rails.groups)
 module EdoPersonalCloud
   class Application < Rails::Application
     config.autoload_paths += %W(#{config.root}/lib/settings #{config.root}/app/validators/)
+    config.middleware.insert_before ActionDispatch::ParamsParser, "CatchJsonParseErrors"
 
     config.time_zone = "Tokyo"
     config.active_record.default_timezone = :local

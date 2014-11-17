@@ -8,6 +8,7 @@ development: &dev
       domain: "ui-dev00.c4sa.jp"
       enable_starttls_auto: false
   exception_notification:
+    notify_errors: true
     sender_address: *mail_sender
     exception_recipients: "oku@realglobe.jp"
 
