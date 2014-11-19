@@ -1,0 +1,27 @@
+{
+  "use_embedded_ruby": true,
+  "rabbitmq": {
+    "ssl": {
+      "cert_chain_file": "/etc/sensu/ssl/cert.pem",
+      "private_key_file": "/etc/sensu/ssl/key.pem"
+    },
+    "host": "{{ rabbitmq_host }}",
+    "port": 5671,
+    "user": "{{ rabbitmq_sensu_user }}",
+    "password": "{{ rabbitmq_sensu_password }}",
+    "vhost": "{{ rabbitmq_sensu_vhost }}"
+  },
+  "client": {
+    "name": "sensu-client",
+    "address": "localhost",
+    "subscriptions": ["all"],
+    "keepalive": {
+      "thresholds": {
+        "warning": 60,
+        "critical": 300
+      },
+      "handlers": ["mailer"],
+      "refresh": 1800
+    }
+  }
+}

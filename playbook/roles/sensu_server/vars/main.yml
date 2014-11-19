@@ -1,0 +1,14 @@
+sensu_version: 0.16
+sensu_dashboard_user: admin
+sensu_dashboard_password: 1k2h0t43rtp1ruqv
+sensu_system_plugins_directory: "{{ sensu_community_plugins_directory }}/plugins/system"
+sensu_embedded_ruby: /opt/sensu/embedded/bin/ruby
+rabbitmq_host: localhost
+
+mailer_settings:
+  admin_gui: http://192.168.33.14:8080
+  mail_from: sensu@monitor.localdomain
+  mail_to: oku@realglobe.jp
+  smtp_address: localhost
+  smtp_domain: localhost
+  smtp_port: 25

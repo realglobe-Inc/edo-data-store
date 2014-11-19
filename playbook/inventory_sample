@@ -8,3 +8,15 @@ install_lua=true
 192.168.33.13
 [db:vars]
 remote_user=vagrant
+
+[sensu-server]
+192.168.33.14
+[sensu-server:vars]
+remote_user=vagrant
+
+[sensu-clients]
+192.168.33.12
+192.168.33.13
+192.168.33.14
+[sensu-clients:vars]
+remote_user=vagrant

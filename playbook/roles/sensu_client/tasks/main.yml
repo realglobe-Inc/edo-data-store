@@ -1,0 +1,16 @@
+- name: install bc
+  yum: name=bc state=present
+- name: set yum repository for sensu
+  copy: src=sensu.repo dest=/etc/yum.repos.d/sensu.repo mode=0644 owner=root group=root
+- name: install sensu
+  yum: name=sensu state=present enablerepo=sensu
+- name: git clone sensu community plugins
+  git: repo=https://github.com/sensu/sensu-community-plugins.git dest={{ sensu_community_plugins_directory }}
+- name: copy setting
+  copy: src=sensu_setting dest=/etc/default/sensu
+- name: copy conf.d/client.json
+  template: src=client.json.j2 dest=/etc/sensu/conf.d/client.json
+- name: copy pem files
+  unarchive: src=client_ssl.tar.gz dest=/etc/sensu
+- name: start sensu-client
+  service: name=sensu-client state=started enabled=yes

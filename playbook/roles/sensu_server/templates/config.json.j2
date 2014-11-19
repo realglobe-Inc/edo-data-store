@@ -1,0 +1,29 @@
+{
+  "use_embedded_ruby": true,
+  "dashboard": {
+    "port": 8080,
+    "user": "{{ sensu_dashboard_user }}",
+    "password": "{{ sensu_dashboard_password }}"
+  },
+  "rabbitmq": {
+    "host": "{{ rabbitmq_host }}",
+    "port": 5671,
+    "user": "{{ rabbitmq_sensu_user }}",
+    "password": "{{ rabbitmq_sensu_password }}",
+    "vhost": "{{ rabbitmq_sensu_vhost }}"
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379
+  },
+  "api": {
+    "host": "localhost",
+    "port": 4567
+  },
+  "handlers": {
+    "default": {
+      "type": "set",
+      "handlers": ["mailer"]
+    }
+  }
+}
