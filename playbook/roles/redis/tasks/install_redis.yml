@@ -9,3 +9,6 @@
 - name: copy redis init script
   template: src=redis_init_script.sh.j2 dest=/etc/init.d/redis mode=755
   sudo: true
+- name: copy logrotate.conf
+  template: src=redis_logrotate.conf.j2 dest=/etc/logrotate.d/redis
+  sudo: true

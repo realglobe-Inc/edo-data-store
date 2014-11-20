@@ -5,6 +5,9 @@
   register: git_clone_app
 - include: update_app.yml
   when: git_clone_app.changed
+- name: copy logrotate.conf
+  template: src=rails_logrotate.conf.j2 dest=/etc/logrotate.d/rails_app
+  sudo: yes
 - name: copy god_unicorn init script
   template: src=god_unicorn_init_script.sh.j2 dest=/etc/init.d/god_unicorn mode=755
   sudo: yes

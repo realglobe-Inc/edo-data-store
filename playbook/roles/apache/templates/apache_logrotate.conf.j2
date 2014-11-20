@@ -1,0 +1,14 @@
+{{ apache_symlink_path }}/logs/*.log {
+    missingok
+    daily
+    rotate 180
+    compress
+    nocreate
+    notifempty
+    copytruncate
+    sharedscripts
+    delaycompress
+    postrotate
+        /sbin/service httpd reload > /dev/null 2>/dev/null || true
+    endscript
+}

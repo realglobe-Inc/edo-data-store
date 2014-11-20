@@ -1,0 +1,9 @@
+{{ app_root }}/log/*.log {
+    missingok
+    daily
+    rotate 180
+    compress
+    nocreate
+    notifempty
+    copytruncate
+}

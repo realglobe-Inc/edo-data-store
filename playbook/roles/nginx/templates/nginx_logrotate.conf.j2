@@ -1,0 +1,9 @@
+{{ nginx_symlink_path }}/logs/*.log {
+    missingok
+    daily
+    rotate 180
+    compress
+    nocreate
+    notifempty
+    copytruncate
+}

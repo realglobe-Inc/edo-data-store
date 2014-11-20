@@ -108,3 +108,6 @@
 - name: chkconfig add
   command: chkconfig --add httpd
   sudo: true
+- name: copy logrotate.conf
+  template: src=apache_logrotate.conf.j2 dest=/etc/logrotate.d/apache
+  sudo: true

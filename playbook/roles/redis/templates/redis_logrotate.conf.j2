@@ -1,0 +1,9 @@
+{{ redis_bin_dir }}/redis.log {
+    missingok
+    daily
+    rotate 30
+    compress
+    nocreate
+    notifempty
+    copytruncate
+}

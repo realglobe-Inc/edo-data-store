@@ -32,3 +32,6 @@
   copy: src=server.crt dest={{ ssl_crt_path }}
 - name: add ssl key
   copy: src=server.key dest={{ ssl_key_path }}
+- name: copy logrotate.conf
+  template: src=nginx_logrotate.conf.j2 dest=/etc/logrotate.d/nginx
+  sudo: true
