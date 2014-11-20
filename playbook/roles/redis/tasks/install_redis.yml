@@ -5,4 +5,7 @@
 - name: create symlink
   file: src={{ redis_install_dir }} path={{ redis_symlink_path }} state=link force=yes
 - name: copy redis.conf
-  copy: src=redis.conf dest={{ redis_bin_dir }}/redis.conf
+  template: src=redis.conf.j2 dest={{ redis_bin_dir }}/redis.conf
+- name: copy redis init script
+  template: src=redis_init_script.sh.j2 dest=/etc/init.d/redis mode=755
+  sudo: true
