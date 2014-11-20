@@ -26,6 +26,10 @@
   when: wget_nginx.changed
 - name: update nginx.conf
   template: src=nginx.conf.j2 dest={{ nginx_symlink_path }}/conf/nginx.conf
+- name: nginx init script
+  template: src=nginx_init_script.sh.j2 dest=/etc/init.d/nginx mode=755
+  sudo: true
+  when: wget_nginx.changed
 - name: start nginx
-  command: "{{ nginx_symlink_path }}/sbin/nginx"
+  service: name=nginx state=started enabled=yes
   sudo: true
