@@ -13,7 +13,7 @@
   },
   "client": {
     "name": "sensu-client",
-    "address": "localhost",
+    "address": "{{ inventory_hostname }}",
     "subscriptions": ["all"],
     "keepalive": {
       "thresholds": {
