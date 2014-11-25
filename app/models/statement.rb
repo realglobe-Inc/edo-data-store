@@ -20,6 +20,9 @@ class Statement < ActiveRecord::Base
     end
   end
 
+  has_many :attachment_relations
+  has_many :attachments, through: :attachment_relations
+
   validates :actor_property, presence: true
   validates :verb_property, presence: true
   validates :object_property, presence: true

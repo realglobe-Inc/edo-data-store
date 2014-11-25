@@ -1,4 +1,7 @@
 class Attachment < ActiveRecord::Base
+  has_many :attachment_relations
+  has_many :statements, through: :attachment_relations
+
   validates :sha2, presence: true, uniqueness: true
 
   class << self
@@ -13,7 +16,7 @@ class Attachment < ActiveRecord::Base
       else
         content_type = statement.properties["attachments"].find{|a| a["sha2"] == sha2}["contentType"]
       end
-      Attachment.new(sha2: sha2, content: body, content_type: content_type)
+      statement.attachments.new(sha2: sha2, content: body, content_type: content_type)
     end
   end
 
