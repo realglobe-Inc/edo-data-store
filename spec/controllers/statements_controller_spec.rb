@@ -1,8 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe StatementsController, :type => :controller do
-  fixtures :statements
-
   before :all do
     user = StoreAgent::User.new("user_001")
     user.workspace("user_001").create
@@ -30,13 +28,15 @@ RSpec.describe StatementsController, :type => :controller do
           sha2: sha2
         }
         json_object = {
-          "actor" => "I",
-          "verb" => "did",
-          "object" => "this",
+          "actor" => {mbox: "mailto:edo_pc_test@realglobe.jp"},
+          "verb" => {id: "http://realglobe.jp/test_verb"},
+          "object" => {id: "http://realglobe.jp/test_object"},
           "attachments" => [img_attachment]
         }
-        st = Statement.create(Statement::build_params(user_uid: "user_002", service_uid: "service_002", json_object: json_object))
-        Attachment.create(sha2: sha2, content: binary_string, content_type: "image/png")
+        st = Statement.new({user_uid: "user_002", service_uid: "service_002"}.merge(json_object))
+        st.save
+        bson_binary_object = BSON::Binary.new(binary_string)
+        Attachment.create(sha2: sha2, content: bson_binary_object, content_type: "image/png")
       end
 
       it "multipart/mixed 形式で返す" do
@@ -68,7 +68,10 @@ RSpec.describe StatementsController, :type => :controller do
         expect(Statement.all.size).to eq statements_size
       end
       it "statement に actor がなければ 403 を返す" do
-        properties = {verb: "Did", object: "This"}
+        properties = {
+          verb: {id: "http://realglobe.jp/test_verb"},
+          object: {id: "http://realglobe.jp/test_object"}
+        }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
         statements_size = Statement.all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
@@ -76,7 +79,10 @@ RSpec.describe StatementsController, :type => :controller do
         expect(Statement.all.size).to eq statements_size
       end
       it "statement に verb がなければ 403 を返す" do
-        properties = {actor: "I", object: "This"}
+        properties = {
+          actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
+          object: {id: "http://realglobe.jp/test_object"}
+        }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
         statements_size = Statement.all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
@@ -84,7 +90,10 @@ RSpec.describe StatementsController, :type => :controller do
         expect(Statement.all.size).to eq statements_size
       end
       it "statement に object がなければ 403 を返す" do
-        properties = {actor: "I", verb: "Did"}
+        properties = {
+          actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
+          verb: {id: "http://realglobe.jp/test_verb"}
+        }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
         statements_size = Statement.all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
@@ -92,7 +101,11 @@ RSpec.describe StatementsController, :type => :controller do
         expect(Statement.all.size).to eq statements_size
       end
       it "actor、verb、object があれば statement が作成され、201 を返す" do
-        properties = {actor: "I", verb: "Did", object: "This"}
+        properties = {
+          actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
+          verb: {id: "http://realglobe.jp/test_verb"},
+          object: {id: "http://realglobe.jp/test_object"}
+        }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
         statements_size = Statement.all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
@@ -123,7 +136,12 @@ RSpec.describe StatementsController, :type => :controller do
             sha2: attachment[:sha2]
           }
         end
-        properties = {actor: "I", verb: "Did", object: "This", attachments: attachment_properties}
+        properties = {
+          actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
+          verb: {id: "http://realglobe.jp/test_verb"},
+          object: {id: "http://realglobe.jp/test_object"},
+          attachments: attachment_properties
+        }
         body = [] <<
           "--#{@boundary}" <<
           "Content-Type: application/json" <<

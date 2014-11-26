@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'rails', '4.1.5'
 gem 'mysql2'
+gem "mongoid", "~> 4.0.0"
 gem 'jquery-rails'
 gem 'turbolinks'
 gem 'unicorn'
@@ -44,6 +45,7 @@ group :test do
   gem "guard-spring"
   gem "spring-commands-rspec"
 #  gem "capybara"
+  gem "factory_girl_rails", "~> 4.0"
   gem "database_cleaner"
   gem "email_spec"
   gem "webmock"

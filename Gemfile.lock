@@ -50,6 +50,7 @@ GEM
       sass (~> 3.0)
       slim (>= 1.3.6, < 3.0)
       terminal-table (~> 1.4)
+    bson (2.3.0)
     builder (3.2.2)
     bullet (4.13.1)
       activesupport (>= 3.0.0)
@@ -79,6 +80,7 @@ GEM
       execjs
     coffee-script-source (1.8.0)
     colored (1.2)
+    connection_pool (2.1.0)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
     database_cleaner (1.3.0)
@@ -92,6 +94,11 @@ GEM
       actionmailer (>= 3.0.4)
       activesupport (>= 3.0.4)
     execjs (2.2.1)
+    factory_girl (4.5.0)
+      activesupport (>= 3.0.0)
+    factory_girl_rails (4.5.0)
+      factory_girl (~> 4.5.0)
+      railties (>= 3.0.0)
     fastercsv (1.5.5)
     fattr (2.2.2)
     ffi (1.9.3)
@@ -163,10 +170,21 @@ GEM
     metric_fu-roodi (3.0.0)
     mime-types (1.25.1)
     minitest (5.4.1)
+    mongoid (4.0.0)
+      activemodel (~> 4.0)
+      moped (~> 2.0.0)
+      origin (~> 2.1)
+      tzinfo (>= 0.3.37)
+    moped (2.0.2)
+      bson (~> 2.2)
+      connection_pool (~> 2.0)
+      optionable (~> 0.2.0)
     multi_json (1.10.1)
     mysql2 (0.3.16)
     netrc (0.7.7)
     oj (2.10.4)
+    optionable (0.2.0)
+    origin (2.1.1)
     parallel (1.2.4)
     paranoia (2.0.2)
       activerecord (~> 4.0)
@@ -338,12 +356,14 @@ DEPENDENCIES
   database_cleaner
   email_spec
   exception_notification
+  factory_girl_rails (~> 4.0)
   god
   guard
   guard-rspec
   guard-spring
   jquery-rails
   metric_fu
+  mongoid (~> 4.0.0)
   multi_json
   mysql2
   oj
