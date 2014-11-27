@@ -1,0 +1,14 @@
+systemLog:
+  path: {{ mongodb_log_file_path }}
+  logAppend: true
+  destination: file
+processManagement:
+  pidFilePath: {{ mongodb_pid_file_path }}
+  fork: true
+net:
+  port: 27017
+  bindIp: 127.0.0.1,{{ inventory_hostname }}
+storage:
+  dbPath: {{ mongodb_storage_directory }}
+security:
+  authorization: enabled

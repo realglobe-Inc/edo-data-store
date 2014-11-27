@@ -1,0 +1,15 @@
+- name: add yum repository
+  copy: src=mongodb.repo dest=/etc/yum.repos.d/mongodb.repo mode=0644 owner=root group=root
+- name: install mongodb
+  yum: name=mongodb-org state=present enablerepo=mongodb
+- name: start mongodb
+  service: name=mongod state=running enabled=yes
+- name: add mongodb user
+  shell: >
+    echo 'db.createUser({user: "{{ mongodb.username }}", pwd: "{{ mongodb.password }}", roles: [{role: "dbOwner", db: "{{ mongodb.database }}"}]})' | mongo {{ mongodb.database }}
+- name: copy mongodb init script
+  template: src=mongod_init_script.sh.j2 dest=/etc/init.d/mongod mode=755
+- name: copy mongod.conf
+  template: src=mongod.conf.j2 dest=/etc/mongod.conf
+- name: restart mongodb
+  service: name=mongod state=restarted
