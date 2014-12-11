@@ -20,11 +20,11 @@ RSpec.describe UsersController, :type => :controller do
         workspace.create
       end
       get :index
-      expect(Oj.load(response.body)["data"]["users"].sort).to eq user_identifiers.sort
+      expect(Oj.load(response.body).sort).to eq user_identifiers.sort
     end
     it "ユーザーが登録されていない場合、users は空配列" do
       get :index
-      expect(Oj.load(response.body)["data"]["users"]).to eq []
+      expect(Oj.load(response.body)).to eq []
     end
   end
 

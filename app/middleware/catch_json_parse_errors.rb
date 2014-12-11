@@ -7,7 +7,7 @@ class CatchJsonParseErrors
     begin
       @app.call(env)
     rescue ActionDispatch::ParamsParser::ParseError => error
-      [400, {"Content-Type" => "application/json"}, [Oj.dump({status: 400, message: "Bad Request: JSON parse error"})]]
+      [400, {"Content-Type" => "application/json"}, [Oj.dump({status: :error, message: "Bad Request: JSON parse error"})]]
     end
   end
 end

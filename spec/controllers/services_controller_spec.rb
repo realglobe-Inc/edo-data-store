@@ -32,11 +32,11 @@ RSpec.describe ServicesController, :type => :controller do
         workspace.directory(uid).create
       end
       get :index, {user_uid: user_uid}
-      expect(Oj.load(response.body)["data"]["services"].sort).to eq service_identifiers.sort
+      expect(Oj.load(response.body).sort).to eq service_identifiers.sort
     end
     it "サービスが登録されていない場合、services は空配列" do
       get :index, {user_uid: user_uid}
-      expect(Oj.load(response.body)["data"]["services"]).to eq []
+      expect(Oj.load(response.body)).to eq []
     end
   end
 

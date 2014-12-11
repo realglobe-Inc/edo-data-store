@@ -14,7 +14,7 @@ module ContentTypeChecker
         status: :error,
         message: "invalid Content-Type '#{content_type}'. required '#{required_content_type}'"
       }
-      render json: response_json, status: 403
+      render json: response_json, status: 400
       return
     end
     x_original_content_type = request.headers["X-Original-Content-Type"]

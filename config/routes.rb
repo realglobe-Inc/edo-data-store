@@ -22,6 +22,15 @@ Rails.application.routes.draw do
             delete "/*path" => "storages#remove_file"
           end
         end
+        resources :permissions, only: %w() do
+          collection do
+            get "/(*path)" => "storages#permissions"
+            post "/(*path)" => "storages#set_permissions"
+            delete "/(*path)" => "storages#unset_permissions"
+          end
+        end
+        post "copy/*path" => "storages#copy"
+        post "move/*path" => "storages#move"
         resources :statements, only: %w(index create)
       end
       resources :permissions, only: %w(index)

@@ -2,10 +2,15 @@ require 'rails_helper'
 
 RSpec.describe StoragesController, :type => :controller do
   before :all do
-    user = StoreAgent::User.new("user_001")
-    user.workspace("user_001").create
+    super_user = StoreAgent::Superuser.new
+    super_user.workspace("user_001").create
+    service_root = super_user.workspace("user_001").directory("service_001")
+    service_root.create do |root_dir|
+      root_dir.initial_metadata["owner"] = "user_001:service_001"
+      root_dir.initial_permission = {"user_001:service_001" => StoreAgent.config.default_owner_permission}
+    end
+    user = StoreAgent::User.new("user_001:service_001")
     service_root = user.workspace("user_001").directory("service_001")
-    service_root.create
     service_root.file("file_000.txt").create
     dir = service_root.directory("dir_001")
     dir.create
@@ -34,13 +39,13 @@ EOF
         get :list_files, {user_uid: user_uid, service_uid: service_uid}
         expect(response.status).to eq 200
         response_json_object = Oj.load(response.body)
-        expect(response_json_object["data"]["files"].sort).to eq ["dir_001", "dir_002", "file_000.txt"]
+        expect(response_json_object.map{|f| f["name"]}.sort).to eq ["dir_001", "dir_002", "file_000.txt"]
       end
       it "path がディレクトリなら、その直下のファイル、ディレクトリ一覧を返す" do
         get :list_files, {user_uid: user_uid, service_uid: service_uid, path: "dir_001"}
         expect(response.status).to eq 200
         response_json_object = Oj.load(response.body)
-        expect(response_json_object["data"]["files"].sort).to eq ["file_001.txt", "file_002"]
+        expect(response_json_object.map{|f| f["name"]}.sort).to eq ["file_001.txt", "file_002"]
       end
       it "path がファイルなら 403 エラーを返す" do
         get :list_files, {user_uid: user_uid, service_uid: service_uid, path: "dir_001/file_001.txt"}

@@ -9,11 +9,24 @@ RSpec.describe StatementsController, :type => :controller do
 
   context "GET /users/xxx/services/yyy/statements" do
     context "添付ファイルがない場合" do
-      it "user_uid, service_uid が一致する statement の一覧を返す" do
-        get :index, {user_uid: "user_001", service_uid: "service_001"}
-        expect(response.status).to eq 200
-        expect(response.content_type).to eq "application/json"
-        expect(Oj.load(response.body)["data"]["statements"].length).to eq 2
+      context "パラメータがない場合" do
+        it "user_uid, service_uid が一致する statement の一覧を返す" do
+          get :index, {user_uid: "user_001", service_uid: "service_001"}
+          expect(response.status).to eq 200
+          expect(response.content_type).to eq "application/json"
+          expect(Oj.load(response.body).length).to eq 2
+        end
+      end
+      context "パラメータがある場合" do
+        it "statementId パラメータがある場合、ID が一致するものだけを返す" do
+          pending
+
+          statement_id = Statement.first.id
+          get :index, {user_uid: "user_001", service_uid: "service_001", statementId: statement_id}
+          expect(response.status).to eq 200
+          expect(response.content_type).to eq "application/json"
+          expect(Oj.load(response.body).length).to eq 1
+        end
       end
     end
     context "添付ファイルがある場合" do
@@ -39,10 +52,35 @@ RSpec.describe StatementsController, :type => :controller do
         Attachment.create(sha2: sha2, content: bson_binary_object, content_type: "image/png")
       end
 
-      it "multipart/mixed 形式で返す" do
-        get :index, {user_uid: "user_002", service_uid: "service_002"}
-        expect(response.status).to eq 200
-        expect(response.content_type).to match "multipart/mixed; boundary=#{Statement::BOUNDARY_REGEXP}"
+      context "attachments パラメータが true の場合" do
+        it "multipart/mixed 形式で返す" do
+          get :index, {user_uid: "user_002", service_uid: "service_002", attachments: "true"}
+          expect(response.status).to eq 200
+          expect(response.content_type).to match "multipart/mixed; boundary=#{Statement::BOUNDARY_REGEXP}"
+          expect(response.body.length).to be > 1000
+        end
+        it "添付ファイルがない statement でも、Content-Type は multipart/mixed" do
+          get :index, {user_uid: "user_001", service_uid: "service_001", attachments: "true"}
+          expect(response.status).to eq 200
+          expect(response.content_type).to match "multipart/mixed; boundary=#{Statement::BOUNDARY_REGEXP}"
+          expect(response.body.length).to be < 1000
+        end
+      end
+      context "attachments パラメータがない場合" do
+        it "ファイルは添付せず、application/json 形式で返す" do
+          get :index, {user_uid: "user_002", service_uid: "service_002"}
+          expect(response.status).to eq 200
+          expect(response.content_type).to eq "application/json"
+          expect(response.body.length).to be < 1000
+        end
+      end
+      context "attachments パラメータが false の場合" do
+        it "ファイルは添付せず、application/json 形式で返す" do
+          get :index, {user_uid: "user_002", service_uid: "service_002", attachments: "false"}
+          expect(response.status).to eq 200
+          expect(response.content_type).to eq "application/json"
+          expect(response.body.length).to be < 1000
+        end
       end
     end
   end
@@ -111,6 +149,19 @@ RSpec.describe StatementsController, :type => :controller do
         post :create, {user_uid: "user_001", service_uid: "service_001"}
         expect(response.status).to eq 201
         expect(Statement.all.size).to eq statements_size + 1
+      end
+      it "id が重複した場合、statement は作成されず、409 を返す" do
+        properties = {
+          id: "xxx-xxx-xxx-xxx",
+          actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
+          verb: {id: "http://realglobe.jp/test_verb"},
+          object: {id: "http://realglobe.jp/test_object"}
+        }
+        request.env["RAW_POST_DATA"] = Oj.dump(properties)
+        statements_size = Statement.all.size
+        post :create, {user_uid: "user_xxx", service_uid: "service_xxx"}
+        expect(response.status).to eq 409
+        expect(Statement.all.size).to eq statements_size
       end
     end
     context "添付ファイルがある（Content-Type が multipart/mixed）場合" do

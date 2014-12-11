@@ -1,3 +1,17 @@
+FactoryGirl.define do
+  stored_at = Time.now
+  factory "test_statement", :class => Statement do
+    user_uid "user_xxx"
+    service_uid "service_xxx"
+    id "xxx-xxx-xxx-xxx"
+    actor ({mbox: "oku@realglobe.jp"})
+    verb ({id: "http://realglobe.jp", display: {"en-US" => "did"}})
+    object ({id: "http://realglobe.jp/test"})
+    stored stored_at
+    timestamp stored_at
+  end
+end
+
 (1..9).each do |i|
   case i
   when 1..2
@@ -13,7 +27,7 @@
 
   FactoryGirl.define do
     stored_at = Time.now - i
-    factory "statement_00#{i}".to_sym, :class => Statement do
+    factory "statement_00#{i}", :class => Statement do
       user_uid user_id
       service_uid service_id
       actor ({mbox: "oku@realglobe.jp"})

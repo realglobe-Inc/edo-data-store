@@ -12,9 +12,6 @@ class Statement
   }
   PROPERTY_NAMES = PROPERTIES.values.flatten
 
-  %w(user_uid service_uid).each do |id_property_name|
-    field id_property_name, type: String
-  end
   field :_id, type: String, default: -> {SecureRandom.uuid}
   %w(actor verb object result context authority).each do |property_name|
     field property_name, type: Hash
@@ -24,14 +21,12 @@ class Statement
   field :version, type: String
   field :attachments, type: Array
 
-  index user_uid: 1, service_uid: 1
   index stored: 1
 
   attr_readonly *PROPERTY_NAMES
   attr_writer :multipart_attachments
 
-  validates :user_uid, presence: true
-  validates :service_uid, presence: true
+  default_scope -> {order_by(:stored.desc)}
 
   validates :actor, presence: true
   validates :verb, presence: true
@@ -43,14 +38,22 @@ class Statement
   after_save :save_multipart_attachments
 
   class << self
+    def with_collection(user_uid: nil, service_uid: nil)
+      with(collection: "statements_#{user_uid}:#{service_uid}")
+    end
+
     def parse_params(raw_message)
       raw_header, body = raw_message.split("#{CRLF}#{CRLF}")
       headers = raw_header.split("#{CRLF}")
       [headers, body]
     end
 
+    def search(user_uid: nil, service_uid: nil)
+      Statement.with_collection(user_uid: user_uid, service_uid: service_uid).all
+    end
+
     def create_simple(user_uid: nil, service_uid: nil, json_string: "")
-      statement = Statement.new(user_uid: user_uid, service_uid: service_uid)
+      statement = Statement.with_collection(user_uid: user_uid, service_uid: service_uid).new
       statement.properties = json_string
       statement
     end
