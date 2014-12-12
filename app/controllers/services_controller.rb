@@ -10,7 +10,7 @@ class ServicesController < ApplicationController
   before_action :validates_service_to_be_absent, only: %w(create)
 
   def index
-    render json: service_root.read
+    render json: service_root.read# {status: :ok, data: {services: service_root.read}}
   end
 
   def create
@@ -22,11 +22,11 @@ class ServicesController < ApplicationController
     end
     @current_user = @workspace = @service_root = nil
     service_root.file(".statements").create
-    render json: {status: :ok, data: {uid: params["service_uid"]}}, status: 201
+    render nothing: true, status: 201
   end
 
   def destroy
     service_root.delete
-    render json: {status: :ok, data: {result: true}}
+    render nothing: true, status: 204
   end
 end

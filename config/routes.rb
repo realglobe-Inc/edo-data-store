@@ -25,13 +25,19 @@ Rails.application.routes.draw do
         resources :permissions, only: %w() do
           collection do
             get "/(*path)" => "storages#permissions"
-            post "/(*path)" => "storages#set_permissions"
+            match "/(*path)" => "storages#set_permissions", via: %w(post put patch)
             delete "/(*path)" => "storages#unset_permissions"
           end
         end
+        get "revisions/(*path)" => "storages#revisions"
         post "copy/*path" => "storages#copy"
         post "move/*path" => "storages#move"
-        resources :statements, only: %w(index create)
+        resources :statements, only: %w() do
+          collection do
+            get "/" => "statements#index"
+            match "/" => "statements#create", via: %w(post put)
+          end
+        end
       end
       resources :permissions, only: %w(index)
     end

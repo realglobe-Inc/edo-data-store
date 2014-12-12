@@ -31,7 +31,7 @@ class StatementsController < ApplicationController
       render json: {status: :error, message: "statement(id: #{statement.id}) already exists"}, status: 409
     elsif statement.save
       Statement.with(collection: statement.collection_name).create_indexes
-      render json: {status: :ok, data: statement.properties}, status: 201
+      render nothing: true, status: 204
     else
       render json: {status: :error, message: statement.errors.full_messages}, status: 403
     end
