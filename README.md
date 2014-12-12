@@ -95,28 +95,17 @@ storage/${path} に対応する権限情報は permission/${path}.perm に保存
 
 ```sh
 # GET /users
-$ curl https://xxx.xxx.xxx/v1/users -H ...
-> {
->   "status": "ok",
->   "data": {
->     "users": [
->       {
->         "uid": "xxx-xxx-xxx-xxx",
->         "storage_size": "1GB"
->       },
->       {
->         "uid": "yyy-yyy-yyy-yyy"
->         "storage_size": "2GB"
->       },
->       ...
->     ]
->   }
-> }
+$ curl https://xxx.xxx.xxx/v1/users
+> ["user_xxx","user_yyy",...]
 ```
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
 |(未定)||(多分ページネーション用のパラメータなどが追加される)|
+
+|エラーメッセージ|ステータスコード|説明|
+|:--|:-:|:--|
+|User Not Found|404|指定されたuser_uidで登録されているユーザーが存在しない|
 
 #### ユーザー登録
 
@@ -124,75 +113,22 @@ $ curl https://xxx.xxx.xxx/v1/users -H ...
 
 ```sh
 # POST /users
-$ curl https://xxx.xxx.xxx/v1/users -H ... -d @- <<EOF
+$ curl https://xxx.xxx.xxx/v1/users -H "Content-Type: application/json" -d @- <<EOF
 {
-  "user_uid": "xxx-xxx-xxx-xxx",
-  "storage_size": "1GB"
+  "user_uid": "xxx-xxx-xxx-xxx"
 }
 EOF
-> {
->   "status": "ok",
->   "data": {
->     "uid": "xxx-xxx-xxx-xxx"
->     "storage_size": "1GB"
->   }
-> }
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
 |user_uid|true|使用開始するユーザーのUID|
-|storage_size||変更後のディスク上限|
 
-#### ユーザー詳細
-
-ユーザーの詳細情報を返す。  
-(場合によってはユーザー一覧に統合されるかも)  
-
-```sh
-# GET /users/:user_uid
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx -H ...
-> {
->   "status": "ok",
->   "data": {
->     {
->       "uid": "xxx-xxx-xxx-xxx"
->       "storage_size": "1GB"
->     }
->   }
-> }
-```
-
-|パラメータ名|必須|説明|
+|エラーメッセージ|ステータスコード|説明|
 |:--|:-:|:--|
-|なし|||
-
-#### ユーザー情報更新
-
-ユーザーの情報を更新する。  
-(現在の想定では、ディスク上限ぐらい)  
-
-```sh
-# PATCH/PUT /users/:user_uid
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx -X PATCH -H ... -d @- <<EOF
-{
-  "storage_size": "2GB"
-}
-EOF
-> {
->   "status": "ok",
->   "data": {
->     {
->       "uid": "xxx-xxx-xxx-xxx"
->       "storage_size": "2GB"
->     }
->   }
-> }
-```
-
-|パラメータ名|必須|説明|
-|:--|:-:|:--|
-|storage_size|true|変更後のディスク上限|
+|Bad Request: JSON parse error|400|JSONの形式がおかしい場合|
+|invalid Content-Type ''. required 'application/json'|||
 
 #### ユーザーの削除
 
@@ -200,13 +136,8 @@ EOF
 
 ```sh
 # DELETE /users/:user_uid
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx -X DELETE -H ...
-> {
->   "status": "ok",
->   "data": {
->     "result": true
->   }
-> }
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx -X DELETE
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
@@ -222,21 +153,12 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx -X DELETE -H ...
 
 #### サービス一覧
 
-ユーザーの利用中のサービス一覧を返す。 
+ユーザーの利用中のサービス一覧を返す。  
 
 ```sh
 # GET /users/:user_uid/services
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services -H ...
-> {
->   "status": "ok",
->   "data": {
->     "services": [
->       {
->         "uid": "xxx-xxx-xxx-xxx"
->       }
->     ]
->   }
-> }
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services
+> ["service_001","service_002",...]
 ```
 
 |パラメータ名|必須|説明|
@@ -249,17 +171,12 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services -H ...
 
 ```sh
 # POST /users/:user_uid/services
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services -H ... -d @- <<EOF
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services -H "Content-Type: application/json" -d @- <<EOF
 {
   "service_uid": "xxx-xxx-xxx-xxx"
 }
 EOF
-> {
->   "status": "ok",
->   "data": {
->     "uid": "xxx-xxx-xxx-xxx"
->   }
-> }
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
@@ -272,13 +189,8 @@ EOF
 
 ```sh
 # DELETE /users/:user_uid/services/:service_uid
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy -X DELETE -H ...
-> {
->   "status": "ok",
->   "data": {
->     "uid": "xxx-xxx-xxx-xxx"
->   }
-> }
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy -X DELETE
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
@@ -292,48 +204,84 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy -X 
 #### ディレクトリ内のファイル一覧
 
 指定されたディレクトリの直下にあるファイル一覧を返す。  
+パラメータが無い場合にはファイル名とディレクトリかどうかだけを返す。  
+metadata=true を指定すると、ファイルサイズや作成日時などの詳細情報を含めて返す。  
 
 ```sh
 # GET /users/:user_uid/services/:service_uid/directory/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar/ -H ...
-> {
->   "status": "ok",
->   "data": {
->     "files": [
->       {
->         "path": "/foo/bar/hoge.txt",
->         "type": "file",
->         "size": 1234,
->         "created_at": 1401234567
->       },
->       {
->         "path": "/foo/bar/hoge/",
->         "type": "directory",
->         "created_at": 1402345678
->       }
->     ]
->   }
-> }
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar
+> [
+>   {
+>     "name": "foo.txt",
+>     "is_dir": false
+>   },
+>   {
+>     "name": "bar",
+>     "is_dir": true
+>   },
+>   ...
+> ]
+
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar?metadata=true
+> [
+>   {
+>     "name": "foo.txt",
+>     "size": "123 byte",
+>     "bytes": 123,
+>     "is_dir": false,
+>     "created_at": "2014-05-14 01:53:20 +0900",
+>     "updated_at": "2014-10-03 23:14:38 +0900",
+>     "created_at_unix_timestamp": 1400000000,
+>     "updated_at_unix_timestamp": 1412345678
+>   },
+>   {
+>     "name": "bar",
+>     "size": "4.00KB",
+>     "bytes": 4096,
+>     "is_dir": true,
+>     "created_at": "2014-05-14 01:53:20 +0900",
+>     "updated_at": "2014-10-03 23:14:38 +0900",
+>     "created_at_unix_timestamp": 1400000000,
+>     "updated_at_unix_timestamp": 1412345678,
+>     "directory_size": "12.06KB",
+>     "directory_bytes": 12345,
+>     "directory_file_count": 1,
+>     "tree_file_count": 2
+>   },
+>   ...
+> ]
 ```
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
-|なし|||
+|metadata||trueを指定すると、各ファイルのメタデータを返す。|
+
+|返り値|説明|
+|:--|:--|
+|name|ファイル/ディレクトリの名前|
+|size|ファイルサイズ（KB、MBなどの単位で表示したもの）|
+|bytes|ファイルサイズ（数値）|
+|is_dir|ディレクトリならtrue、ファイルならfalse|
+|created_at|ファイルの作成日時|
+|updated_at|ファイルの最終更新日時|
+|created_at_unix_timestamp|ファイルの作成日時（UNIXタイムスタンプ）|
+|updated_at_unix_timestamp|ファイルの最終更新日時（UNIXタイムスタンプ）|
+|directory_size|ディレクトリの配下全体のファイルサイズの合計（KB、MBなどの単位で表示したもの）|
+|directory_bytes|ディレクトリの配下全体のファイルサイズの合計（数値）|
+|directory_file_count|ディレクトリ直下にあるファイル数|
+|tree_file_count|ディレクトリ配下のツリー全体のファイル数|
 
 #### ディレクトリの作成
 
 指定されたパスにディレクトリを作成する。  
 
 ```sh
-# PUT/POST /users/:user_uid/services/:service_uid/directory/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar/hoge/ -X PUT -H ...
-> {
->   "status": "ok",
->   "data": {
->     "directory": "/foo/bar/hoge/",
->     "files": []
->   }
-> }
+# POST|PUT /users/:user_uid/services/:service_uid/directory/*path
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar/hoge -X POST
+> # bodyは無し
+
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar/hoge/fuga/ -X PUT
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
@@ -346,13 +294,8 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/dir
 
 ```sh
 # DELETE /users/:user_uid/services/:service_uid/directory/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar/hoge/ -X DELETE -H ...
-> {
->   "status": "ok",
->   "data": {
->     "result": true
->   }
-> }
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/directory/foo/bar/hoge/ -X DELETE
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
@@ -366,56 +309,165 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/dir
 
 ```sh
 # GET /users/:user_uid/services/:service_uid/file/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -H ...
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt
 > (/foo/bar/hoge.txt の中身)
 ```
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
-|なし|||
+|revision||バージョン番号|
+
+|エラーメッセージ|ステータスコード|説明|
+|:--|:-:|:--|
+|invalid revision|403|パラメータとして渡されたrevisionが不正な値だった場合|
 
 #### ファイルの作成
 
 指定されたパスにファイルを作成する。  
 
 ```sh
-# PUT/POST /users/:user_uid/services/:service_uid/file/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X PUT -H ... --data-binary @- <<EOF
+# POST|PUT /users/:user_uid/services/:service_uid/file/*path
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X PUT --data-binary @- <<EOF
 (ファイルの中身)
 EOF
-> {
->   "status": "ok",
->   "data": {
->     "path": "/foo/bar/hoge.txt",
->     "type": "file",
->     "size": 1234,
->     "created_at": 1401234567
->   }
-> }
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
-|overwrite||既にファイルが存在する場合に上書きするかどうか|
+|overwrite||trueなら、既にファイルが存在する場合に上書きする|
 
 #### ファイルの削除
 
-指定されたパスのファイルを削除する。
+指定されたパスのファイルを削除する。  
 
 ```sh
 # DELETE /users/:user_uid/services/:service_uid/file/*path
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X DELETE -H ...
-> {
->   "status": "ok",
->   "data": {
->     "result": true
->   }
-> }
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/file/foo/bar/hoge.txt -X DELETE
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
 |なし|||
+
+#### ファイル/ディレクトリのコピー
+
+指定されたパスのファイル/ディレクトリを、dest_pathで指定されたパスにコピーする。  
+
+```sh
+# POST /users/:user_uid/services/:service_uid/copy/*path?dest_path=/path/to/dest
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/copy/foo/bar?dest_path=/hoge/fuga -X POST
+> # bodyは無し
+```
+
+|パラメータ名|必須|説明|
+|:--|:-:|:--|
+|dest_path|true|コピー先のパス|
+|overwrite||trueなら、ファイルのコピー時にファイルが存在する場合に上書きする|
+
+#### ファイル/ディレクトリの移動
+
+指定されたパスのファイル/ディレクトリを、dest_pathで指定されたパスに移動する。  
+
+```sh
+# POST /users/:user_uid/services/:service_uid/move/*path?dest_path=/path/to/dest
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/move/foo/bar?dest_path=/hoge/fuga -X POST
+> # bodyは無し
+```
+
+|パラメータ名|必須|説明|
+|:--|:-:|:--|
+|dest_path|true|コピー先のパス|
+|overwrite||trueなら、ファイルのコピー時にファイルが存在する場合に上書きする|
+
+#### リビジョン番号の取得
+
+指定されたパスのファイル/ディレクトリのリビジョン番号を返す。  
+ファイルの取得時にリビジョン番号を指定すると、過去のファイル内容が取得できる。  
+
+```sh
+# GET /users/:user_uid/services/:service_uid/revisions/*path
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/revisions/foo/bar
+> ["revision_xxx", "revision_yyy", ...]
+```
+
+|パラメータ名|必須|説明|
+|:--|:-:|:--|
+|なし|||
+
+#### 権限情報の取得
+
+指定されたパスのファイル/ディレクトリに対する権限情報を返す。  
+権限は "ユーザーUID:サービスUID" をキーにした、以下のようなハッシュで返される。  
+
+```sh
+# GET /users/:user_uid/services/:service_uid/permissions/*path
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/permissions/foo/bar
+> {
+>   "xxx-xxx-xxx-xxx:yyy-yyy-yyy-yyy": {
+>     "read": true,
+>     "write": true
+>   },
+>   "xxx-xxx-xxx-xxx:zzz-zzz-zzz-zzz": {
+>     "read": true
+>   },
+>   ...
+> }
+```
+
+#### 権限の設定
+
+指定されたパスのファイル/ディレクトリに対する権限を設定する。  
+
+```sh
+# POST/PUT/PATCH /users/:user_uid/services/:service_uid/permissions/*path
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/permissions/foo/bar -H "Content-Type: application/json" -X PATCH -d @- <<EOF
+{
+  "target_user": "xxx-xxx-xxx-xxx",
+  "target_service": "zzz-zzz-zzz-zzz",
+  "permissions": {
+    "write": false
+  }
+}
+EOF
+> {
+>   "xxx-xxx-xxx-xxx:yyy-yyy-yyy-yyy": {
+>     "read": true,
+>     "write": true
+>   },
+>   "xxx-xxx-xxx-xxx:zzz-zzz-zzz-zzz": {
+>     "read": true,
+>     "write": false
+>   },
+>   ...
+> }
+```
+
+#### 権限の設定解除
+
+指定されたパスのファイル/ディレクトリに設定されている権限を解除する。  
+
+```sh
+# DELETE /users/:user_uid/services/:service_uid/permissions/*path
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/permissions/foo/bar -H "Content-Type: application/json" -X DELETE -d @- <<EOF
+{
+  "target_user": "xxx-xxx-xxx-xxx",
+  "target_service": "zzz-zzz-zzz-zzz",
+  "permissions": ["write"]
+}
+EOF
+> {
+>   "xxx-xxx-xxx-xxx:yyy-yyy-yyy-yyy": {
+>     "read": true,
+>     "write": true
+>   },
+>   "xxx-xxx-xxx-xxx:zzz-zzz-zzz-zzz": {
+>     "read": true
+>   },
+>   ...
+> }
+```
 
 ===
 
@@ -425,57 +477,58 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/fil
 
 ```sh
 # GET /users/:user_uid/services/:service_uid/statements
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/statements -H ...
-> {
->   "status": "ok",
->   "data": {
->     "statements": []
->   }
-> }
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/statements
+> [
+>   {
+>     "id": "xxx-xxx-xxx-xxx",
+>     "actor": {
+>       "mbox": "test_user@realglobe.jp"
+>     },
+>     "verb": {
+>       "id": "http://realglobe.jp/do"
+>     },
+>     "object": {
+>       "id": "http://realglobe.jp/it"
+>     },
+>     "stored": "2014-01-01T00:00:00.000Z",
+>     "timestamp": "2014-01-01T00:00:00.000Z"
+>   },
+>   ...
+> ]
+
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/statements?xxx=xxx&attachments=true
+> --boundary
+> Content-Type: application/json
+>
+> []
+> --boundary
 ```
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
-|(未定)||(多分ページネーション用のパラメータなどが追加される)|
+|attachments||true なら multipart/mixed 形式で添付ファイルを含むレスポンスを返す|
 
 #### statementの保存
 
 ```sh
-# POST /users/:user_uid/services/:service_uid/statements
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/statements -H ... -d @- <<EOF
-{...}
+# POST|PUT /users/:user_uid/services/:service_uid/statements
+$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/statements -H "Content-Type: application/json" -d @- <<EOF
+{
+  "id": "xxx-xxx-xxx-xxx",
+  "actor": {
+    "mbox": "test_user@realglobe.jp"
+  },
+  "verb": {
+    "id": "http://realglobe.jp/did"
+  },
+  "object": {
+    "id": "http://realglobe.jp/it"
+  }
+}
 EOF
-> {
->   "status": "ok",
->   "data": {
->     "result": true
->   }
-> }
+> # bodyは無し
 ```
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
 |なし|||
-
-===
-
-### アクセス権のAPI
-
-#### アクセス権の一覧
-
-そのユーザーの領域にアクセスできるサービスのUIDの一覧を返す。  
-
-```sh
-# GET /v1/users/:user_uid/permissions
-$ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/permissions -H ...
-> {
->   "status": "ok",
->   "data": {
->     "permissions": [
->       {
->         "uid": "xxx-xxx-xxx-xxx"
->       }
->     ]
->   }
-> }
-```
