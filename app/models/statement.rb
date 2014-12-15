@@ -52,13 +52,13 @@ class Statement
       Statement.with_collection(user_uid: user_uid, service_uid: service_uid).all
     end
 
-    def create_simple(user_uid: nil, service_uid: nil, json_string: "")
+    def build_simple(user_uid: nil, service_uid: nil, json_string: "")
       statement = Statement.with_collection(user_uid: user_uid, service_uid: service_uid).new
       statement.properties = json_string
       statement
     end
 
-    def create_mixed(user_uid: nil, service_uid: nil, multipart_body: "", content_type: "")
+    def build_mixed(user_uid: nil, service_uid: nil, multipart_body: "", content_type: "")
       if content_type !~ /boundary=(#{BOUNDARY_REGEXP})/
         raise content_type.inspect
       end
@@ -71,7 +71,7 @@ class Statement
         service_uid: service_uid,
         json_string: statement_body
       }
-      statement = create_simple(statement_params)
+      statement = build_simple(statement_params)
       statement.multipart_attachments = parts.map do |attachment_string|
         attachment_headers, attachment_body = parse_params(attachment_string)
         attachment_params = {
@@ -99,6 +99,14 @@ class Statement
         r[key] = value
       end
       r
+    end
+  end
+
+  def []=(attr_name, value)
+    begin
+      super
+    rescue Mongoid::Errors::InvalidValue => e
+      errors.add attr_name, :invalid_value
     end
   end
 

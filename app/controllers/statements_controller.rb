@@ -1,10 +1,13 @@
 class StatementsController < ApplicationController
   include ResponseJsonNotificationsAdder
+  include ResponseJsonTemplateRenderer
   include StorageManager
   include StatementBuilder
 
   before_action :check_read_permission, only: %w(index)
   before_action :check_write_permission, only: %w(create)
+  before_action :build_new_statement, only: %w(create)
+  before_action :render_error_response, only: %w(create)
 
   def index
     statements = Statement.with_collection(user_uid: params[:user_uid], service_uid: params[:service_uid]).all
@@ -18,22 +21,13 @@ class StatementsController < ApplicationController
   end
 
   def create
-    case request.content_type
-    when "application/json"
-      statement = Statement.create_simple(user_uid: params[:user_uid], service_uid: params[:service_uid], json_string: request.raw_post)
-    when "multipart/mixed"
-      statement = Statement.create_mixed(user_uid: params[:user_uid], service_uid: params[:service_uid], multipart_body: request.raw_post, content_type: request.headers["Content-Type"])
-    else
-      render json: {status: :error, message: "invalid Content-Type"}, status: 400
-      return
-    end
-    if Statement.where(id: statement.id).present?
-      render json: {status: :error, message: "statement(id: #{statement.id}) already exists"}, status: 409
-    elsif statement.save
-      Statement.with(collection: statement.collection_name).create_indexes
+    if Statement.where(id: @statement.id).present?
+      render json_template: :duplicated_id, template_params: {id: @statement.id}, status: 409
+    elsif @statement.save
+      Statement.with(collection: @statement.collection_name).create_indexes
       render nothing: true, status: 204
     else
-      render json: {status: :error, message: statement.errors.full_messages}, status: 403
+      render_error_response
     end
   end
 
@@ -45,13 +39,30 @@ class StatementsController < ApplicationController
 
   def check_read_permission
     if !service_root.file(".statement").permission.allow?("read")
-      render json: {status: :error, message: "permission denied"}, status: 403
+      render json_template: :permission_denied, status: 403
     end
   end
 
   def check_write_permission
     if !service_root.file(".statement").permission.allow?("write")
-      render json: {status: :error, message: "permission denied"}, status: 403
+      render json_template: :permission_denied, status: 403
+    end
+  end
+
+  def build_new_statement
+    case request.content_type
+    when "application/json"
+      @statement = Statement.build_simple(user_uid: params[:user_uid], service_uid: params[:service_uid], json_string: request.raw_post)
+    when "multipart/mixed"
+      @statement = Statement.build_mixed(user_uid: params[:user_uid], service_uid: params[:service_uid], multipart_body: request.raw_post, content_type: request.headers["Content-Type"])
+    else
+      render json_template: :invalid_content_type, status: 400
+    end
+  end
+
+  def render_error_response
+    if @statement.errors.present?
+      render json_template: :invalid_value, descriptions: @statement.errors.full_messages, status: 400
     end
   end
 end
