@@ -1,0 +1,24 @@
+ja:
+  json:
+    template:
+      json_parse_error:
+        message: "bad request"
+        description: "JSON として不正なフォーマットです。"
+      unexpected_error:
+        message: "unexpected error"
+        description: "エラーが発生しました。"
+      parse_params_error:
+        message: "invalid parameters"
+        description: "パラメータの形式が不正です。"
+      invalid_content_type:
+        message: "invalid Content-Type"
+        description: "Content-Type ヘッダに application/json または multipart/mixed を指定して下さい。"
+      invalid_value:
+        message: "invalid value"
+        description: "Tin Canステートメントとして不正なフォーマットです。"
+      duplicated_id:
+        message: "duplicated ID"
+        description: "%{id} は既に使用されています。"
+      permission_denied:
+        message: "permission denied"
+        description: "権限がありません。"

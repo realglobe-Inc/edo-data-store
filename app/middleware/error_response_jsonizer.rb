@@ -13,7 +13,10 @@ class ErrorResponseJsonizer
       end
       [code, header, body]
     rescue => e
-      [400, {"Content-Type" => "application/json"}, [Oj.dump({status: :error, message: "unexpected error"})]]
+      status_code = 404
+      response_header = {"Content-Type" => "application/json"}
+      response_json_object = ::ResponseJsonBuilder.build(:unexpected_error, status: status_code)
+      [status_code, response_header, [Oj.dump(response_json_object)]]
     end
   end
 end

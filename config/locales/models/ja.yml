@@ -40,17 +40,3 @@ ja:
               <<: *base
             version:
               <<: *base
-  json:
-    template:
-      invalid_content_type:
-        message: "invalid Content-Type"
-        description: "Content-Type ヘッダに application/json または multipart/mixed を指定して下さい。"
-      invalid_value:
-        message: "invalid value"
-        description: "Tin Canステートメントとして不正なフォーマットです。"
-      duplicated_id:
-        message: "duplicated ID"
-        description: "%{id} は既に使用されています。"
-      permission_denied:
-        message: "permission denied"
-        description: "権限がありません。"

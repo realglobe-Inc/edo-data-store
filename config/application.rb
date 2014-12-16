@@ -15,7 +15,8 @@ module EdoPersonalCloud
   class Application < Rails::Application
     config.autoload_paths += %W(#{config.root}/lib/settings #{config.root}/app/validators/)
     config.middleware.insert_before ActionDispatch::ParamsParser, "CatchJsonParseErrors"
-    config.middleware.insert_before Rack::MethodOverride, "ErrorResponseJsonizer"
+    config.middleware.insert_after ActionDispatch::DebugExceptions, "RequestParamsParser"
+    config.middleware.unshift "ErrorResponseJsonizer"
     config.middleware.unshift "ErrorResponseNotifier"
 
     config.time_zone = "Tokyo"
