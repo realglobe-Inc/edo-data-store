@@ -2,6 +2,7 @@ class StoragesController < ApplicationController
   include ContentTypeChecker
   include StorageManager
   include ResponseJsonNotificationsAdder
+  include ResponseJsonTemplateRenderer
 
   before_action :require_content_type_json, only: %w(set_permissions unset_permissions)
   before_action :validates_user_to_be_superuser, only: %w(permissions set_permissions unset_permissions)
@@ -123,38 +124,38 @@ class StoragesController < ApplicationController
 
   def validates_object_to_be_present
     if !object.exists?
-      render json: {status: :error, message: "#{params[:path]} not found"}, status: 404
+      render json_template: :not_found, template_params: {path: params[:path]}, status: 404
     end
   end
 
   def validates_object_to_be_absent
     if object.exists?
-      render json: {status: :error, message: "#{params[:path]} is already exists"}, status: 403
+      render json_template: :already_exists, template_params: {path: params[:path]}, status: 409
     end
   end
 
   def validates_object_to_be_directory
     if !object.directory?
-      render json: {status: :error, message: "#{params[:path]} is not directory"}, status: 403
+      render json_template: :is_not_directory, template_params: {path: params[:path]}, status: 403
     end
   end
 
   def validates_object_to_be_not_directory
     if object.directory?
-      render json: {status: :error, message: "#{params[:path]} is directory"}, status: 403
+      render json_template: :is_directory, template_params: {path: params[:path]}, status: 403
     end
   end
 
   def validates_object_to_be_file
     if !object.file?
-      render json: {status: :error, message: "#{params[:path]} is not file"}, status: 403
+      render json_template: :is_not_file, template_params: {path: params[:path]}, status: 403
     end
   end
 
   def validates_parent_to_be_present
     parent = object.parent_directory
     if !parent.exists?
-      render json: {status: :error, message: "directory #{parent.path} not exists"}, status: 404
+      render json_template: :not_found, template_params: {path: File.dirname(params[:path])}, status: 404
     end
   end
 
@@ -162,9 +163,9 @@ class StoragesController < ApplicationController
     case
     when !dest_object.exists?
     when dest_object.directory?
-      render json: {status: :error, message: "directory #{params[:dest_path]} is already exists"}, status: 409
+      render json_template: :directory_already_exists, template_params: {dest_path: params[:dest_path]}, status: 409
     when object.directory?
-      render json: {status: :error, message: "can't copy #{params[:path]}(directory) to #{params[:dest_path]}(file)"}, status: 409
+      render json_template: :con_not_copy_directory_to_file, template_params: {path: params[:path], dest_path: params[:dest_path]}, status: 409
     when params[:overwrite] != "true"
       cannot_overwrite_error(params[:dest_path])
     end
@@ -175,10 +176,10 @@ class StoragesController < ApplicationController
     params.require(:target_service)
     @target = "#{params[:target_user]}:#{params[:target_service]}"
   rescue
-    render json: {status: :error, message: "target_user and target_service is required"}, status: 400
+    render json_template: :required_target_params, status: 400
   end
 
   def cannot_overwrite_error(path)
-    render json: {status: :error, message: "file #{path} is already exists. overwrite=true to overwrite"}, status: 403
+    render json_template: :overwrite_is_not_true, template_params: {path: params[:path]}, status: 403
   end
 end

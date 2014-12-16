@@ -1,5 +1,6 @@
 module ContentTypeChecker
   extend ActiveSupport::Concern
+  include ResponseJsonTemplateRenderer
 
   private
 
@@ -10,11 +11,7 @@ module ContentTypeChecker
   def require_content_type(required_content_type)
     content_type = request.headers["Content-Type"]
     if content_type != required_content_type
-      response_json = {
-        status: :error,
-        message: "invalid Content-Type '#{content_type}'. required '#{required_content_type}'"
-      }
-      render json: response_json, status: 400
+      render json_template: :invalid_content_type, template_params: {content_type: required_content_type}, status: 400
       return
     end
     x_original_content_type = request.headers["X-Original-Content-Type"]

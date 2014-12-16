@@ -1,5 +1,6 @@
 module StorageManager
   extend ActiveSupport::Concern
+  include ResponseJsonTemplateRenderer
 
   private
 
@@ -31,25 +32,25 @@ module StorageManager
 
   def validates_user_to_be_present
     if !workspace.exists?
-      render json: {status: :error, message: "user not found"}, status: 404
+      render json_template: :user_not_found, template_params: {user_uid: user_uid}, status: 404
     end
   end
 
   def validates_user_to_be_absent
     if workspace.exists?
-      render json: {status: :error, message: "user already exists"}, status: 409
+      render json_template: :user_already_exists, template_params: {user_uid: user_uid}, status: 409
     end
   end
 
   def validates_service_to_be_present
     if !service_root.exists?
-      render json: {status: :error, message: "service not found"}, status: 404
+      render json_template: :service_not_found, template_params: {service_uid: service_uid}, status: 404
     end
   end
 
   def validates_service_to_be_absent
     if service_root.exists?
-      render json: {status: :error, message: "service already exists"}, status: 409
+      render json_template: :service_already_exists, template_params: {service_uid: service_uid}, status: 409
     end
   end
 

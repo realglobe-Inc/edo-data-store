@@ -56,7 +56,7 @@ class StatementsController < ApplicationController
     when "multipart/mixed"
       @statement = Statement.build_mixed(user_uid: params[:user_uid], service_uid: params[:service_uid], multipart_body: request.raw_post, content_type: request.headers["Content-Type"])
     else
-      render json_template: :invalid_content_type, status: 400
+      render json_template: :invalid_content_type, template_params: {content_type: "application/json または multipart/mixed"}, status: 400
     end
   end
 

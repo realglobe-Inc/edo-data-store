@@ -10,9 +10,21 @@ ja:
       parse_params_error:
         message: "invalid parameters"
         description: "パラメータの形式が不正です。"
+      user_not_found:
+        message: "user not found"
+        description: "UIDが %{user_uid} のユーザーは登録されていません。"
+      user_already_exists:
+        message: "user already exists"
+        description: "UIDが %{user_uid} のユーザーは既に登録されています。"
+      service_not_found:
+        message: "service not found"
+        description: "UIDが %{service_uid} のサービスは登録されていません。"
+      service_already_exists:
+        message: "service already exists"
+        description: "UIDが %{service_uid} のサービスは既に登録されています。"
       invalid_content_type:
         message: "invalid Content-Type"
-        description: "Content-Type ヘッダに application/json または multipart/mixed を指定して下さい。"
+        description: "Content-Type ヘッダに %{content_type} を指定してください。"
       invalid_value:
         message: "invalid value"
         description: "Tin Canステートメントとして不正なフォーマットです。"
@@ -22,3 +34,30 @@ ja:
       permission_denied:
         message: "permission denied"
         description: "権限がありません。"
+      not_found:
+        message: "not found"
+        description: "%{path} にファイルが存在しません。"
+      already_exists:
+        message: "already exists"
+        description: "%{path} には既にファイルが存在します。"
+      directory_already_exists:
+        message: "directory already exists"
+        description: "%{dest_path} には既にディレクトリが存在します。"
+      con_not_copy_directory_to_file:
+        message: "can not copy directory to file"
+        description: "ディレクトリ %{path} をファイル %{dest_path} にコピーする事はできません。"
+      is_directory:
+        message: "is directory"
+        description: "%{path} はディレクトリです。"
+      is_not_directory:
+        message: "is not directory"
+        description: "%{path} はディレクトリではありません。"
+      is_not_file:
+        message: "is not file"
+        description: "%{path} はファイルではありません。"
+      overwrite_is_not_true:
+        message: "overwrite is not true"
+        description: "%{path} にはファイルが既に存在します。上書きする場合は overwrite=true を指定してください。"
+      required_target_params:
+        message: "required target params"
+        description: "target_user、target_service は必須パラメータです。"
