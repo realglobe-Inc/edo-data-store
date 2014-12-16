@@ -8,6 +8,7 @@
 #     debug_message do
 #       "do ... end のブロックで書く場合はこう"
 #     end
+#     debug_message(:foo, :bar) { "引数は渡しても無視される" }
 #     debug_message do
 #       [
 #        "返り値として配列を返すと",
@@ -20,8 +21,15 @@
 #     end
 #   end
 # end
+#
+# あるいは以下のように、モジュール関数をそのまま呼び出しても良い。
+#
+# DebugLogger.debug_message { "ログに残すメッセージ" }
+#
 
 module DebugLogger
+  module_function
+
   def debug_log_file_path
     "#{Rails.root}/log/#{Rails.env}_debug.log"
   end
@@ -36,7 +44,7 @@ module DebugLogger
   rescue
   end
 
-  def debug_message
+  def debug_message(*_)
     begin
       messages = yield
     rescue => e
