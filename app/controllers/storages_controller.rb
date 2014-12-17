@@ -8,27 +8,29 @@ class StoragesController < ApplicationController
   before_action :validates_user_to_be_superuser, only: %w(permissions set_permissions unset_permissions)
   before_action :validates_user_to_be_present
   before_action :validates_service_to_be_present
-  before_action :validates_object_to_be_present, only: %w(list_files remove_directory read_file remove_file copy move permissions set_permissions unset_permissions)
+  before_action :validates_object_to_be_present, only: %w(remove_directory remove_file copy move permissions set_permissions unset_permissions)
+  before_action :validates_object_to_be_present_if_no_revision, only: %w(list_files read_file)
   before_action :validates_object_to_be_directory, only: %w(list_files remove_directory)
   before_action :validates_object_to_be_not_directory, only: %w(write_file)
-  before_action :validates_object_to_be_file, only: %w(read_file remove_file)
+  before_action :validates_object_to_be_file, only: %w(remove_file)
+  before_action :validates_object_to_be_file_if_no_revision, only: %w(read_file)
   before_action :validates_object_to_be_absent, only: %w(make_directory)
   before_action :validates_parent_to_be_present, only: %w(make_directory write_file)
   before_action :validates_dest_object_to_be_writable, only: %w(copy move)
   before_action :check_target, only: %w(set_permissions unset_permissions)
 
   def list_files
-    filenames = object.read
+    filenames = directory.read
     reject_parameters = %w(owner directory_size_limit directory_bytes_limit)
     file_list = filenames.map do |filename|
       if params["metadata"] == "true"
-        file = object.find_object(filename)
+        file = directory.find_object(filename)
         metadata = file.get_metadata.reject{|key, value| reject_parameters.include?(key)}
         {name: filename}.merge(metadata)
       else
         {
           name: filename,
-          is_dir: File.directory?("#{object.storage_object_path}#{filename}")
+          is_dir: File.directory?("#{directory.storage_object_path}#{filename}")
         }
       end
     end
@@ -41,12 +43,12 @@ class StoragesController < ApplicationController
   end
 
   def remove_directory
-    object.delete
+    directory.delete
     render nothing: true, status: 204
   end
 
   def read_file
-    send_data object.read(revision: params[:revision])
+    send_data file.read(revision: params[:revision])
   rescue StoreAgent::InvalidRevisionError => e
     render json: {status: :error, message: "invalid revision '#{params[:revision]}' to #{params[:path]}"}, status: 403
   end
@@ -68,7 +70,7 @@ class StoragesController < ApplicationController
   end
 
   def remove_file
-    object.delete
+    file.delete
     render nothing: true, status: 204
   end
 
@@ -128,6 +130,12 @@ class StoragesController < ApplicationController
     end
   end
 
+  def validates_object_to_be_present_if_no_revision
+    if !params[:revision]
+      validates_object_to_be_present
+    end
+  end
+
   def validates_object_to_be_absent
     if object.exists?
       render json_template: :resource_already_exists, template_params: {path: params[:path]}, status: 409
@@ -149,6 +157,12 @@ class StoragesController < ApplicationController
   def validates_object_to_be_file
     if !object.file?
       render json_template: :is_not_file, template_params: {path: params[:path]}, status: 403
+    end
+  end
+
+  def validates_object_to_be_file_if_no_revision
+    if !params[:revision]
+      validates_object_to_be_file
     end
   end
 
