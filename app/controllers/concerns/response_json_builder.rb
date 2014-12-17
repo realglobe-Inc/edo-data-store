@@ -3,7 +3,7 @@ module ResponseJsonBuilder
 
   def build(template_name, **params)
     status_code = params[:status] || 200
-    message = params.delete(:message) || I18n.t("json.template.#{template_name}.message")
+    error_code = template_name.to_s.classify
     descriptions = params.delete(:descriptions)
     if !descriptions
       template_params = params.delete(:template_params)
@@ -12,11 +12,11 @@ module ResponseJsonBuilder
           template_params[path_params] = File.absolute_path("/./#{path_value}")
         end
       end
-      descriptions = [I18n.t("json.template.#{template_name}.description", template_params)]
+      descriptions = [I18n.t("json.template.description.#{template_name}", template_params)]
     end
     {
       status_code: status_code,
-      message: message,
+      error_code: error_code,
       descriptions: descriptions
     }
   end

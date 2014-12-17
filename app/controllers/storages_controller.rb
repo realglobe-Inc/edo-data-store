@@ -124,13 +124,13 @@ class StoragesController < ApplicationController
 
   def validates_object_to_be_present
     if !object.exists?
-      render json_template: :not_found, template_params: {path: params[:path]}, status: 404
+      render json_template: :resource_not_found, template_params: {path: params[:path]}, status: 404
     end
   end
 
   def validates_object_to_be_absent
     if object.exists?
-      render json_template: :already_exists, template_params: {path: params[:path]}, status: 409
+      render json_template: :resource_already_exists, template_params: {path: params[:path]}, status: 409
     end
   end
 
@@ -155,7 +155,7 @@ class StoragesController < ApplicationController
   def validates_parent_to_be_present
     parent = object.parent_directory
     if !parent.exists?
-      render json_template: :not_found, template_params: {path: File.dirname(params[:path])}, status: 404
+      render json_template: :resource_not_found, template_params: {path: File.dirname(params[:path])}, status: 404
     end
   end
 

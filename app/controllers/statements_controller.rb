@@ -62,7 +62,7 @@ class StatementsController < ApplicationController
 
   def render_error_response
     if @statement.errors.present?
-      render json_template: :invalid_value, descriptions: @statement.errors.full_messages, status: 400
+      render json_template: :invalid_statement_value, descriptions: @statement.errors.full_messages, status: 400
     end
   end
 end
