@@ -84,6 +84,50 @@ storage/${path} に対応する権限情報は permission/${path}.perm に保存
 * POST/PUT/PATCH リクエストの場合、パラメータはJSON形式でリクエストボディとして送信する。  
   * その場合、リクエストヘッダで Content-Type: application/json を指定する。  
 
+
+### エラーレスポンス
+
+エラー発生時には、以下のようなJSON形式のレスポンスを返す。  
+
+```json
+{
+  "status_code": 404,
+  "message": "not found",
+  "descriptions": ["ファイルが存在しません。"]
+}
+```
+
+|パラメータ名|説明|
+|:--|:--|
+|status_code|HTTPステータスコード。|
+|error_code|エラーコード。|
+|descriptions|エラー内容の詳細情報。複数の原因がある場合があるので、配列を返す。|
+
+エラーコードの一覧と、その発生原因は以下。  
+
+|エラーコード|エラー発生原因|
+|:--|:--|
+|JsonParseError|渡されたパラメータがJSONとして解析できなかった。|
+|ParseParamsError|渡されたパラメータを解析できなかった。|
+|UserNotFound|指定されたUIDのユーザーが登録されていない。|
+|UserAlreadyExist|既に存在するユーザーのUIDが指定された。|
+|ServiceNotFound|指定されたUIDのサービスが登録されていない。|
+|ServiceAlreadyExist|既に存在するサービスのUIDが指定された。|
+|InvalidContentType|リクエストヘッダで正しいContent-Typeが指定されていない。|
+|InvalidStatementValue|渡されたJSONパラメータが、Tin Canステートメントとして無効な形式だった。|
+|DuplicatedId|パラメータで渡されたIDのTin Canステートメントが既に存在している。|
+|PermissionDenied|指定したリソースに対して操作を行う権限が無い。|
+|ResourceNotFound|指定したパスにファイルやディレクトリが存在しない。|
+|ResourceAlreadyExist|指定したパスに、既にファイルやディレクトリが存在している。|
+|DirectoryAlreadyExist|指定したパスに、既にディレクトリが存在している。|
+|ConNotCopyDirectoryToFile|コピー元オブジェクトはディレクトリだが、コピー先オブジェクトがファイル。|
+|IsDirectory|指定したパスにあるオブジェクトがディレクトリ。|
+|IsNotDirectory|指定したパスにあるオブジェクトがディレクトリではない。|
+|IsNotFile|指定したパスにあるオブジェクトがファイルではない。|
+|OverwriteIsNotTrue|overwriteパラメータにtrueが指定されていないので、ファイルの上書きを行わなかった。|
+|RequiredTargetParam|対象のユーザー/サービスが指定されていない。|
+|UnexpectedError|その他のエラーが発生した。|
+
 ### ユーザー管理API
 
 ユーザー管理システムから使用する。  
@@ -101,11 +145,7 @@ $ curl https://xxx.xxx.xxx/v1/users
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
-|(未定)||(多分ページネーション用のパラメータなどが追加される)|
-
-|エラーメッセージ|ステータスコード|説明|
-|:--|:-:|:--|
-|User Not Found|404|指定されたuser_uidで登録されているユーザーが存在しない|
+|なし|||
 
 #### ユーザー登録
 
@@ -124,11 +164,6 @@ EOF
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
 |user_uid|true|使用開始するユーザーのUID|
-
-|エラーメッセージ|ステータスコード|説明|
-|:--|:-:|:--|
-|Bad Request: JSON parse error|400|JSONの形式がおかしい場合|
-|invalid Content-Type ''. required 'application/json'|||
 
 #### ユーザーの削除
 
@@ -163,7 +198,7 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
-|(未定)||(多分ページネーション用のパラメータなどが追加される)|
+|なし|||
 
 #### サービス登録
 
@@ -256,14 +291,16 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/dir
 |:--|:-:|:--|
 |metadata||trueを指定すると、各ファイルのメタデータを返す。|
 
+各パラメータの意味は以下。  
+
 |返り値|説明|
 |:--|:--|
 |name|ファイル/ディレクトリの名前|
 |size|ファイルサイズ（KB、MBなどの単位で表示したもの）|
 |bytes|ファイルサイズ（数値）|
 |is_dir|ディレクトリならtrue、ファイルならfalse|
-|created_at|ファイルの作成日時|
-|updated_at|ファイルの最終更新日時|
+|created_at|ファイルの作成日時（ISO 8601形式）|
+|updated_at|ファイルの最終更新日時（ISO 8601形式）|
 |created_at_unix_timestamp|ファイルの作成日時（UNIXタイムスタンプ）|
 |updated_at_unix_timestamp|ファイルの最終更新日時（UNIXタイムスタンプ）|
 |directory_size|ディレクトリの配下全体のファイルサイズの合計（KB、MBなどの単位で表示したもの）|
@@ -317,10 +354,6 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/fil
 |:--|:-:|:--|
 |revision||バージョン番号|
 
-|エラーメッセージ|ステータスコード|説明|
-|:--|:-:|:--|
-|invalid revision|403|パラメータとして渡されたrevisionが不正な値だった場合|
-
 #### ファイルの作成
 
 指定されたパスにファイルを作成する。  
@@ -335,7 +368,7 @@ EOF
 
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
-|overwrite||trueなら、既にファイルが存在する場合に上書きする|
+|overwrite||既にファイルが存在する場合に、trueが指定されていると上書きする|
 
 #### ファイルの削除
 
@@ -364,7 +397,7 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/cop
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
 |dest_path|true|コピー先のパス|
-|overwrite||trueなら、ファイルのコピー時にファイルが存在する場合に上書きする|
+|overwrite||既にファイルが存在する場合に、trueが指定されていると上書きする|
 
 #### ファイル/ディレクトリの移動
 
@@ -379,7 +412,7 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/mov
 |パラメータ名|必須|説明|
 |:--|:-:|:--|
 |dest_path|true|コピー先のパス|
-|overwrite||trueなら、ファイルのコピー時にファイルが存在する場合に上書きする|
+|overwrite||既にファイルが存在する場合に、trueが指定されていると上書きする|
 
 #### リビジョン番号の取得
 
@@ -416,9 +449,14 @@ $ curl https://xxx.xxx.xxx/v1/users/xxx-xxx-xxx-xxx/services/yyy-yyy-yyy-yyy/per
 > }
 ```
 
+|パラメータ名|必須|説明|
+|:--|:-:|:--|
+|なし|||
+
 #### 権限の設定
 
 指定されたパスのファイル/ディレクトリに対する権限を設定する。  
+パラメータで指定されたユーザーが、指定されたサービスからオブジェクトを操作する時に、指定された権限を参照する。  
 
 ```sh
 # POST/PUT/PATCH /users/:user_uid/services/:service_uid/permissions/*path
@@ -444,9 +482,16 @@ EOF
 > }
 ```
 
+|パラメータ名|必須|説明|
+|:--|:-:|:--|
+|target_user|true|権限を設定する対象ユーザーのUID|
+|target_service|true|権限を設定する対象サービスのUID|
+|permissions|true|設定する権限のハッシュ|
+
 #### 権限の設定解除
 
 指定されたパスのファイル/ディレクトリに設定されている権限を解除する。  
+パラメータで指定されたユーザーが、指定されたサービスからオブジェクトを操作する時に参照される権限設定を解除する。  
 
 ```sh
 # DELETE /users/:user_uid/services/:service_uid/permissions/*path
@@ -468,6 +513,12 @@ EOF
 >   ...
 > }
 ```
+
+|パラメータ名|必須|説明|
+|:--|:-:|:--|
+|target_user|true|権限を設定する対象ユーザーのUID|
+|target_service|true|権限を設定する対象サービスのUID|
+|permissions|true|設定解除する権限の配列|
 
 ===
 
