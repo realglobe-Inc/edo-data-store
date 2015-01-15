@@ -1,8 +1,6 @@
 FactoryGirl.define do
   stored_at = Time.now
-  factory "test_statement", :class => Statement do
-    user_uid "user_xxx"
-    service_uid "service_xxx"
+  factory "test_statement", :class => Statement.with_collection(user_uid: "user_xxx", service_uid: "service_xxx") do
     id "xxx-xxx-xxx-xxx"
     actor ({mbox: "oku@realglobe.jp"})
     verb ({id: "http://realglobe.jp", display: {"en-US" => "did"}})
@@ -27,9 +25,7 @@ end
 
   FactoryGirl.define do
     stored_at = Time.now - i
-    factory "statement_00#{i}", :class => Statement do
-      user_uid user_id
-      service_uid service_id
+    factory "statement_00#{i}", :class => Statement.with_collection(user_uid: user_id, service_uid: service_id) do
       actor ({mbox: "oku@realglobe.jp"})
       verb ({id: "http://realglobe.jp", display: {"en-US" => "did"}})
       object ({id: "http://realglobe.jp/#{i}"})
