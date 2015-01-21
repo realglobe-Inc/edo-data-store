@@ -6,7 +6,7 @@ Rails.application.routes.draw do
     resources :users, only: %w(), param: :uid do
       # 認証サーバーから利用するAPI
       resources :services, only: %w(index create destroy), param: :service_uid
-      resources :services, only: %w(), param: :uid do
+      resources :services, only: %w(), param: :uid, service_uid: /.*/ do
         # サービスから利用するAPI
         resources :directory, only: %w() do
           collection do
