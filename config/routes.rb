@@ -39,7 +39,17 @@ Rails.application.routes.draw do
           end
         end
       end
+      resources :statements, only: %w() do
+        collection do
+          get "/" => "statements#users_index"
+        end
+      end
       resources :permissions, only: %w(index)
+    end
+    resources :statements, only: %w() do
+      collection do
+        get "/" => "statements#last_statements"
+      end
     end
   end
 

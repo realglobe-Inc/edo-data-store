@@ -20,6 +20,22 @@ class StatementsController < ApplicationController
     end
   end
 
+  def users_index
+    service_uids = params[:service_uids].split(",")
+    statements = get_last_statements(user_uid: params[:user_uid], service_uids: service_uids)
+    render json: statements
+  end
+
+  def last_statements
+    user_uids = params[:user_uids].split(",")
+    service_uids = params[:service_uids].split(",")
+    statements = user_uids.inject({}) do |r, user_uid|
+      r[user_uid] = get_last_statements(user_uid: user_uid, service_uids: service_uids)
+      r
+    end
+    render json: statements
+  end
+
   def create
     if Statement.where(id: @statement.id).present?
       render json_template: :duplicated_id, template_params: {id: @statement.id}, status: 409
@@ -57,6 +73,14 @@ class StatementsController < ApplicationController
       @statement = Statement.build_mixed(user_uid: params[:user_uid], service_uid: params[:service_uid], multipart_body: request.raw_post, content_type: request.headers["Content-Type"])
     else
       render json_template: :invalid_content_type, template_params: {content_type: "application/json または multipart/mixed"}, status: 400
+    end
+  end
+
+  def get_last_statements(user_uid: "", service_uids: [])
+    service_uids.inject({}) do |r, service_uid|
+      statements = Statement.with_collection(user_uid: user_uid, service_uid: service_uid).limit(1)
+      r[service_uid] = statements.first.try(:properties)
+      r
     end
   end
 
