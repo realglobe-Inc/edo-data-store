@@ -1,4 +1,4 @@
-development:
+development: &dev
   sessions:
     default:
       database: edo_pc_dev
@@ -17,6 +17,9 @@ development:
     scope_overwrite_exception: true
     use_activesupport_time_zone: true
     use_utc: false
+
+production:
+  <<: *dev
 
 test:
   sessions:
