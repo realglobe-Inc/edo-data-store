@@ -58,25 +58,26 @@ EOF
     end
     %w(post put).each do |method|
       context "#{method.upcase} /users/xxx/services/yyy/directory/*path" do
-        it "path にファイルが存在しなければ、ディレクトリを作成する" do
+        it "path にファイルが存在しなければディレクトリを作成し、201 を返す" do
           send method, :make_directory, {user_uid: user_uid, service_uid: service_uid, path: "dir_002/sub_dir_#{method}"}
-          expect(response.status).to eq 201
-#          expect(response.body).to eq Oj.dump({status: :ok, data: {directory: "/dir_002/sub_dir_#{method}"}})
-          expect(response.body).to eq Oj.dump({status: :ok, data: {directory: "/service_001/dir_002/sub_dir_#{method}/"}})
+          expect_201_ok(data: {directory: "/service_001/dir_002/sub_dir_#{method}/"})
+#          expect(response.status).to eq 201
+#          expect(response.body).to eq Oj.dump({status: :ok, data: {directory: "/service_001/dir_002/sub_dir_#{method}/"}})
         end
-        it "path にファイルやディレクトリが存在すれば、403 エラーを返す" do
+        it "path にファイルやディレクトリが存在すれば、409 エラーを返す" do
           send method, :make_directory, {user_uid: user_uid, service_uid: service_uid, path: "dir_001"}
-          expect_403_error(error_message: "dir_001 is already exists")
+          expect_409_error(error_message: "dir_001 is already exists")
         end
       end
     end
     context "DELETE /users/xxx/services/yyy/directory/*path" do
-      it "path がディレクトリなら、削除される" do
+      it "path がディレクトリなら削除され、204 を返す" do
         file_path = "tmp/store_agent_test/user_001/storage/service_001/dir_002/delete_dir"
         expect(File.exists?(file_path)).to be true
         delete :remove_directory, {user_uid: user_uid, service_uid: service_uid, path: "dir_002/delete_dir"}
-        expect(response.status).to eq 200
-        expect(response.body).to eq Oj.dump({status: :ok, data: {result: true}})
+        expect_204_ok(data: {result: true})
+#        expect(response.status).to eq 200
+#        expect(response.body).to eq Oj.dump({status: :ok, data: {result: true}})
         expect(File.exists?(file_path)).to be false
       end
       it "path がファイルなら 403 エラーを返す" do
@@ -113,20 +114,28 @@ EOF
     end
     %w(post put).each do |method|
       context "#{method.upcase} /users/xxx/services/yyy/file/*path" do
-        it "path にファイルが存在しなければ、ファイルを作成する" do
+        it "path にファイルが存在しなければファイルを作成し、201 を返す" do
           request.env["RAW_POST_DATA"] = "file body"
           send method, :write_file, {user_uid: user_uid, service_uid: service_uid, path: "dir_002/new_file_#{method}"}
-          expect(response.status).to eq 201
-#          expect(response.body).to eq Oj.dump({status: :ok, data: {path: "dir_002/new_file_#{method}", size: 9}})
-          expect(response.body).to eq Oj.dump({status: :ok, data: {path: "/service_001/dir_002/new_file_#{method}", size: 9}})
+          expect_201_ok(data: {path: "/service_001/dir_002/new_file_#{method}", size: 9})
+#          expect(response.status).to eq 201
+#          expect(response.body).to eq Oj.dump({status: :ok, data: {path: "/service_001/dir_002/new_file_#{method}", size: 9}})
         end
-        it "path にファイルが存在する場合、上書きする" do
-          body_str = "update file body #{method}"
-          request.env["RAW_POST_DATA"] = body_str
-          send method, :write_file, {user_uid: user_uid, service_uid: service_uid, path: "file_000.txt"}
-          expect(response.status).to eq 200
-#          expect(response.body).to eq Oj.dump({status: :ok, data: {path: "file_000.txt", size: body_str.length}})
-          expect(response.body).to eq Oj.dump({status: :ok, data: {path: "/service_001/file_000.txt", size: body_str.length}})
+        context "path にファイルが存在する場合" do
+          it "overwrite=true が指定されていなければ 403 エラーを返す" do
+            body_str = "update file body #{method}"
+            request.env["RAW_POST_DATA"] = body_str
+            send method, :write_file, {user_uid: user_uid, service_uid: service_uid, path: "file_000.txt"}
+            expect_403_error(error_message: "overwrite is not true")
+          end
+          it "overwrite=true が指定されていれば上書きする" do
+            body_str = "update file body #{method}"
+            request.env["RAW_POST_DATA"] = body_str
+            send method, :write_file, {user_uid: user_uid, service_uid: service_uid, path: "file_000.txt", overwrite: "true"}
+            expect(response.status).to eq 200
+            expect(response.body.blank?).to be true
+#          expect(response.body).to eq Oj.dump({status: :ok, data: {path: "/service_001/file_000.txt", size: body_str.length}})
+          end
         end
         it "path にディレクトリが存在する場合、403 エラーを返す" do
           send method, :write_file, {user_uid: user_uid, service_uid: service_uid, path: "dir_001"}
@@ -135,10 +144,11 @@ EOF
       end
     end
     context "DELETE /users/xxx/services/yyy/file/*path" do
-      it "path にファイルが存在する場合、削除する" do
+      it "path にファイルが存在する場合は削除し、204 を返す" do
         delete :remove_file, {user_uid: user_uid, service_uid: service_uid, path: "dir_002/delete_file.txt"}
-        expect(response.status).to eq 200
-        expect(response.body).to eq Oj.dump({status: :ok, data: {result: true}})
+        expect_204_ok(data: {result: true})
+#        expect(response.status).to eq 200
+#        expect(response.body).to eq Oj.dump({status: :ok, data: {result: true}})
       end
       it "path にディレクトリが存在する場合、403 エラーを返す" do
         delete :remove_file, {user_uid: user_uid, service_uid: service_uid, path: "dir_001"}

@@ -29,10 +29,10 @@ RSpec.describe UsersController, :type => :controller do
   end
 
   context "POST /users" do
-    it "Content-Type が application/json でないと 403 エラーを返す" do
+    it "Content-Type が application/json でないと 400 エラーを返す" do
       request.headers["Content-Type"] = "text/html"
       post :create, {user_uid: :foobar}
-      expect(response.status).to eq 403
+      expect(response.status).to eq 400
     end
     it "user_uid パラメータが無いと 500 エラーを返す" do
       pending
@@ -44,21 +44,21 @@ RSpec.describe UsersController, :type => :controller do
       post :create, {user_uid: :hoge}
       expect_201_ok(data: {uid: :hoge})
     end
-    it "user_uid が重複したら 403 エラーを返す" do
+    it "user_uid が重複したら 409 エラーを返す" do
       post :create, {user_uid: :fuga}
       post :create, {user_uid: :fuga}
-      expect_403_error(error_message: "user already exists")
+      expect_409_error(error_message: "user already exists")
     end
   end
 
   context "DELETE /users/xxx" do
-    it "ユーザーが削除される" do
+    it "ユーザーが削除され、204 を返す" do
       uid = "user_del"
       user = StoreAgent::User.new(uid)
       workspace = user.workspace(uid)
       workspace.create
       delete :destroy, {user_uid: uid}
-      expect(response.status).to eq 200
+      expect(response.status).to eq 204
       expect(File.exists?("#{StoreAgent.config.storage_root}/#{uid}")).to be false
     end
     it "ユーザーが存在しない場合、404 エラーを返す" do

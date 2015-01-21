@@ -41,10 +41,10 @@ RSpec.describe ServicesController, :type => :controller do
   end
 
   context "POST /users/xxx/services" do
-    it "Content-Type が application/json でないと 403 エラーを返す" do
+    it "Content-Type が application/json でないと 400 エラーを返す" do
       request.headers["Content-Type"] = "text/html"
       post :create, {user_uid: user_uid, service_uid: :service_001}
-      expect(response.status).to eq 403
+      expect(response.status).to eq 400
     end
     it "service_uid パラメータが無いと 500 エラーを返す" do
       pending
@@ -56,10 +56,10 @@ RSpec.describe ServicesController, :type => :controller do
       post :create, {user_uid: user_uid, service_uid: :service_001}
       expect_201_ok(data: {uid: "service_001"})
     end
-    it "service_uid が重複したら 403 エラーを返す" do
+    it "service_uid が重複したら 409 エラーを返す" do
       post :create, {user_uid: user_uid, service_uid: :service_002}
       post :create, {user_uid: user_uid, service_uid: :service_002}
-      expect_403_error(error_message: "service already exists")
+      expect_409_error(error_message: "service already exists")
     end
   end
 
@@ -73,13 +73,13 @@ RSpec.describe ServicesController, :type => :controller do
       workspace = user.workspace(user_uid)
       workspace.create
     end
-    it "サービスが削除される" do
+    it "サービスが削除され、204 を返す" do
       service_uid = "service_del"
       user = StoreAgent::User.new(user_uid)
       workspace = user.workspace(user_uid)
       workspace.directory(service_uid).create
       delete :destroy, {user_uid: user_uid, service_uid: service_uid}
-      expect(response.status).to eq 200
+      expect(response.status).to eq 204
       expect(workspace.directory(workspace).exists?).to be false
     end
     it "サービスが存在しない場合、404 エラーを返す" do

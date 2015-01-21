@@ -21,7 +21,7 @@ RSpec.describe StatementsController, :type => :controller do
         it "statementId パラメータがある場合、ID が一致するものだけを返す" do
           pending
 
-          statement_id = Statement.first.id
+          statement_id = Statement.with_collection(user_uid: "user_001", service_uid: "service_001").first.id
           get :index, {user_uid: "user_001", service_uid: "service_001", statementId: statement_id}
           expect(response.status).to eq 200
           expect(response.content_type).to eq "application/json"
@@ -46,7 +46,7 @@ RSpec.describe StatementsController, :type => :controller do
           "object" => {id: "http://realglobe.jp/test_object"},
           "attachments" => [img_attachment]
         }
-        st = Statement.new({user_uid: "user_002", service_uid: "service_002"}.merge(json_object))
+        st = Statement.with_collection(user_uid: "user_002", service_uid: "service_002").new(json_object)
         st.save
         bson_binary_object = BSON::Binary.new(binary_string)
         Attachment.create(sha2: sha2, content: bson_binary_object, content_type: "image/png")
@@ -92,63 +92,67 @@ RSpec.describe StatementsController, :type => :controller do
       end
 
       it "user が登録されていなければ 403 を返す" do
+        skip
+
         request.env["RAW_POST_DATA"] = Oj.dump({foo: :bar})
-        statements_size = Statement.all.size
+        statements_size = Statement.with_collection(user_uid: "user_002", service_uid: "service_001").all.size
         post :create, {user_uid: "user_002", service_uid: "service_001"}
         expect(response.status).to eq 403
-        expect(Statement.all.size).to eq statements_size
+        expect(Statement.with_collection(user_uid: "user_002", service_uid: "service_001").all.size).to eq statements_size
       end
       it "service が登録されていなければ 403 を返す" do
+        skip
+
         request.env["RAW_POST_DATA"] = Oj.dump({foo: :bar})
-        statements_size = Statement.all.size
+        statements_size = Statement.with_collection(user_uid: "user_001", service_uid: "service_002").all.size
         post :create, {user_uid: "user_001", service_uid: "service_002"}
         expect(response.status).to eq 403
-        expect(Statement.all.size).to eq statements_size
+        expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_002").all.size).to eq statements_size
       end
-      it "statement に actor がなければ 403 を返す" do
+      it "statement に actor がなければ 400 を返す" do
         properties = {
           verb: {id: "http://realglobe.jp/test_verb"},
           object: {id: "http://realglobe.jp/test_object"}
         }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
-        statements_size = Statement.all.size
+        statements_size = Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
-        expect(response.status).to eq 403
-        expect(Statement.all.size).to eq statements_size
+        expect(response.status).to eq 400
+        expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size).to eq statements_size
       end
-      it "statement に verb がなければ 403 を返す" do
+      it "statement に verb がなければ 400 を返す" do
         properties = {
           actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
           object: {id: "http://realglobe.jp/test_object"}
         }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
-        statements_size = Statement.all.size
+        statements_size = Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
-        expect(response.status).to eq 403
-        expect(Statement.all.size).to eq statements_size
+        expect(response.status).to eq 400
+        expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size).to eq statements_size
       end
-      it "statement に object がなければ 403 を返す" do
+      it "statement に object がなければ 400 を返す" do
         properties = {
           actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
           verb: {id: "http://realglobe.jp/test_verb"}
         }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
-        statements_size = Statement.all.size
+        statements_size = Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
-        expect(response.status).to eq 403
-        expect(Statement.all.size).to eq statements_size
+        expect(response.status).to eq 400
+        expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size).to eq statements_size
       end
-      it "actor、verb、object があれば statement が作成され、201 を返す" do
+      it "actor、verb、object があれば statement が作成され、204 を返す" do
         properties = {
           actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
           verb: {id: "http://realglobe.jp/test_verb"},
           object: {id: "http://realglobe.jp/test_object"}
         }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
-        statements_size = Statement.all.size
+        statements_size = Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
-        expect(response.status).to eq 201
-        expect(Statement.all.size).to eq statements_size + 1
+        expect(response.status).to eq 204
+        expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size).to eq statements_size + 1
       end
       it "id が重複した場合、statement は作成されず、409 を返す" do
         properties = {
@@ -158,10 +162,10 @@ RSpec.describe StatementsController, :type => :controller do
           object: {id: "http://realglobe.jp/test_object"}
         }
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
-        statements_size = Statement.all.size
+        statements_size = Statement.with_collection(user_uid: "user_xxx", service_uid: "service_xxx").all.size
         post :create, {user_uid: "user_xxx", service_uid: "service_xxx"}
         expect(response.status).to eq 409
-        expect(Statement.all.size).to eq statements_size
+        expect(Statement.with_collection(user_uid: "user_xxx", service_uid: "service_xxx").all.size).to eq statements_size
       end
     end
     context "添付ファイルがある（Content-Type が multipart/mixed）場合" do
@@ -170,7 +174,7 @@ RSpec.describe StatementsController, :type => :controller do
         request.headers["Content-Type"] = "multipart/mixed;\r\n boundary=#{@boundary}"
       end
 
-      it "statement と attachment が作成され、201 を返す" do
+      it "statement と attachment が作成され、204 を返す" do
         attachments = [] <<
           {content_type: "text/plain", content_body: "plain text"} <<
           {content_type: "application/json", content_body: '{"name": "foo", "state": "bar"}'} <<
@@ -209,10 +213,10 @@ RSpec.describe StatementsController, :type => :controller do
         end
         body << "--#{@boundary}--"
         request.env["RAW_POST_DATA"] = body.join("\r\n")
-        statements_size = Statement.all.size
+        statements_size = Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
-        expect(response.status).to eq 201
-        expect(Statement.all.size).to eq statements_size + 1
+        expect(response.status).to eq 204
+        expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size).to eq statements_size + 1
         expect(Attachment.all.size).to eq attachments.size
         attachments.each do |attachment|
           expect(Attachment.where(sha2: attachment[:sha2]).first.content).to eq attachment[:content_body]

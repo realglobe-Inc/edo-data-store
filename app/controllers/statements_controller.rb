@@ -37,7 +37,7 @@ class StatementsController < ApplicationController
   end
 
   def create
-    if Statement.where(id: @statement.id).present?
+    if Statement.with_collection(user_uid: params[:user_uid], service_uid: params[:service_uid]).where(id: @statement.id).present?
       render json_template: :duplicated_id, template_params: {id: @statement.id}, status: 409
     elsif @statement.save
       Statement.with(collection: @statement.collection_name).create_indexes
