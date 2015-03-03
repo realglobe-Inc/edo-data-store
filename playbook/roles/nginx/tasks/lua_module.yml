@@ -88,7 +88,7 @@
     version={{ lua_openssl_version }}
   register: git_clone_lua_openssl
 - name: make lua-openssl
-  command: make PREFIX={{ openssl_install_dir }} CFLAGS="-I{{ luajit_src_dir }}/src -DPTHREADS" chdir={{ lua_openssl_src_dir }}
+  command: make PREFIX={{ openssl_install_dir }} CFLAGS="-I{{ luajit_src_dir }}/src -DPTHREADS -fPIC" chdir={{ lua_openssl_src_dir }}
   ignore_errors: true
   when: git_clone_lua_openssl.changed
 - name: make install lua-openssl
