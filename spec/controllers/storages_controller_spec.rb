@@ -60,7 +60,7 @@ EOF
       context "#{method.upcase} /users/xxx/services/yyy/directory/*path" do
         it "path にファイルが存在しなければディレクトリを作成し、201 を返す" do
           send method, :make_directory, {user_uid: user_uid, service_uid: service_uid, path: "dir_002/sub_dir_#{method}"}
-          expect_201_ok(data: {directory: "/service_001/dir_002/sub_dir_#{method}/"})
+          expect_201_created(data: {directory: "/service_001/dir_002/sub_dir_#{method}/"})
 #          expect(response.status).to eq 201
 #          expect(response.body).to eq Oj.dump({status: :ok, data: {directory: "/service_001/dir_002/sub_dir_#{method}/"}})
         end
@@ -73,12 +73,10 @@ EOF
     context "DELETE /users/xxx/services/yyy/directory/*path" do
       it "path がディレクトリなら削除され、204 を返す" do
         file_path = "tmp/store_agent_test/user_001/storage/service_001/dir_002/delete_dir"
-        expect(File.exists?(file_path)).to be true
         delete :remove_directory, {user_uid: user_uid, service_uid: service_uid, path: "dir_002/delete_dir"}
-        expect_204_ok(data: {result: true})
+        expect_204_no_content
 #        expect(response.status).to eq 200
 #        expect(response.body).to eq Oj.dump({status: :ok, data: {result: true}})
-        expect(File.exists?(file_path)).to be false
       end
       it "path がファイルなら 403 エラーを返す" do
         delete :remove_directory, {user_uid: user_uid, service_uid: service_uid, path: "dir_001/file_001.txt"}
@@ -117,7 +115,7 @@ EOF
         it "path にファイルが存在しなければファイルを作成し、201 を返す" do
           request.env["RAW_POST_DATA"] = "file body"
           send method, :write_file, {user_uid: user_uid, service_uid: service_uid, path: "dir_002/new_file_#{method}"}
-          expect_201_ok(data: {path: "/service_001/dir_002/new_file_#{method}", size: 9})
+          expect_201_created(data: {path: "/service_001/dir_002/new_file_#{method}", size: 9})
 #          expect(response.status).to eq 201
 #          expect(response.body).to eq Oj.dump({status: :ok, data: {path: "/service_001/dir_002/new_file_#{method}", size: 9}})
         end
@@ -146,7 +144,7 @@ EOF
     context "DELETE /users/xxx/services/yyy/file/*path" do
       it "path にファイルが存在する場合は削除し、204 を返す" do
         delete :remove_file, {user_uid: user_uid, service_uid: service_uid, path: "dir_002/delete_file.txt"}
-        expect_204_ok(data: {result: true})
+        expect_204_no_content
 #        expect(response.status).to eq 200
 #        expect(response.body).to eq Oj.dump({status: :ok, data: {result: true}})
       end

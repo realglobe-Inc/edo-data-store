@@ -54,7 +54,7 @@ RSpec.describe ServicesController, :type => :controller do
     end
     it "user_uid、service_uid パラメータが正しければサービス登録され、201 を返す" do
       post :create, {user_uid: user_uid, service_uid: :service_001}
-      expect_201_ok(data: {uid: "service_001"})
+      expect_201_created(data: {uid: "service_001"})
     end
     it "service_uid が重複したら 409 エラーを返す" do
       post :create, {user_uid: user_uid, service_uid: :service_002}

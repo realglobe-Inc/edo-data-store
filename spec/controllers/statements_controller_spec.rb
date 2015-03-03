@@ -142,7 +142,7 @@ RSpec.describe StatementsController, :type => :controller do
         expect(response.status).to eq 400
         expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size).to eq statements_size
       end
-      it "actor、verb、object があれば statement が作成され、204 を返す" do
+      it "actor、verb、object があれば statement が作成され、200 を返す" do
         properties = {
           actor: {mbox: "mailto:edo_pc_test@realglobe.jp"},
           verb: {id: "http://realglobe.jp/test_verb"},
@@ -151,7 +151,8 @@ RSpec.describe StatementsController, :type => :controller do
         request.env["RAW_POST_DATA"] = Oj.dump(properties)
         statements_size = Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
-        expect(response.status).to eq 204
+        expect(response.status).to eq 200
+        expect(response.body).to eq Statement.with_collection(user_uid: "user_001", service_uid: "service_001").first.id
         expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size).to eq statements_size + 1
       end
       it "id が重複した場合、statement は作成されず、409 を返す" do
@@ -174,7 +175,7 @@ RSpec.describe StatementsController, :type => :controller do
         request.headers["Content-Type"] = "multipart/mixed;\r\n boundary=#{@boundary}"
       end
 
-      it "statement と attachment が作成され、204 を返す" do
+      it "statement と attachment が作成され、200 を返す" do
         attachments = [] <<
           {content_type: "text/plain", content_body: "plain text"} <<
           {content_type: "application/json", content_body: '{"name": "foo", "state": "bar"}'} <<
@@ -215,7 +216,8 @@ RSpec.describe StatementsController, :type => :controller do
         request.env["RAW_POST_DATA"] = body.join("\r\n")
         statements_size = Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size
         post :create, {user_uid: "user_001", service_uid: "service_001"}
-        expect(response.status).to eq 204
+        expect(response.status).to eq 200
+        expect(response.body).to eq Statement.with_collection(user_uid: "user_001", service_uid: "service_001").first.id
         expect(Statement.with_collection(user_uid: "user_001", service_uid: "service_001").all.size).to eq statements_size + 1
         expect(Attachment.all.size).to eq attachments.size
         attachments.each do |attachment|

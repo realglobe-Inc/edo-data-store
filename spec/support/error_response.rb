@@ -12,12 +12,12 @@ def expect_200_ok(data: data)
   expect_ok(status_code: 200, data: data)
 end
 
-def expect_201_ok(data: data)
+def expect_201_created(data: data)
   expect(response.status).to eq 201
   expect(response.body.blank?).to be true
 end
 
-def expect_204_ok(data: data)
+def expect_204_no_content
   expect(response.status).to eq 204
   expect(response.body.blank?).to be true
 end

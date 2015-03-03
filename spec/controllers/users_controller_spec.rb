@@ -42,7 +42,7 @@ RSpec.describe UsersController, :type => :controller do
     end
     it "user_uid が正しければユーザーが作成され、201 を返す" do
       post :create, {user_uid: :hoge}
-      expect_201_ok(data: {uid: :hoge})
+      expect_201_created(data: {uid: :hoge})
     end
     it "user_uid が重複したら 409 エラーを返す" do
       post :create, {user_uid: :fuga}
