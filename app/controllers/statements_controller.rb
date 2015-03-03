@@ -41,7 +41,7 @@ class StatementsController < ApplicationController
       render json_template: :duplicated_id, template_params: {id: @statement.id}, status: 409
     elsif @statement.save
       Statement.with(collection: @statement.collection_name).create_indexes
-      render nothing: true, status: 204
+      render text: @statement.id
     else
       render_error_response
     end
