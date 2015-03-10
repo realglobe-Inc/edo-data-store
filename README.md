@@ -1,76 +1,148 @@
-## ディレクトリ構造
+## インストール方法
+
+### rubyをインストール
+
+以下の例では [rbenv](https://github.com/sstephenson/rbenv) + [ruby-build](https://github.com/sstephenson/ruby-build) を使用してruby 2.1.4をインストールする。  
 
 ```sh
-users/
-  ├ user_1_uid/
-  ├ ...
-  └ user_n_uid/
-      ├ .git/
-      ├ permission/
-      |   ├ ...
-      |   └ ...
-      ├ metadata/
-      |   ├ .meta
-      |   ├ service_1_uid/
-      |   |   └ .meta
-      |   ├ ...
-      |   └ service_x_uid/
-      |       ├ .meta
-      |       ├ file_1.meta
-      |       ├ ...
-      |       └ file_n.meta
-      └ storage/
-          ├ service_1_uid/
-          ├ ...
-          └ service_x_uid/
-              ├ file_1
-              ├ ...
-              └ file_n
+# rbenvのインストール。詳細はrbenvのドキュメントを参照
+$ git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
+$ echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+$ echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
+
+# ruby-buildのインストール。詳細はruby-buildのドキュメントを参照
+$ git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
+
+# rubyとbundlerのインストール
+$ rbenv install 2.1.4
+$ rbenv global 2.1.4
+$ gem install bundler
 ```
 
-## メタデータ
+### 設定ファイル
 
-ファイルディレクトリと同じ構成で /metadata/ 以下にツリーを作成する。  
-storage/${path} に対応するメタデータは metadata/${path}.meta に保存する。  
-例えば、  
-* `/` に対応するメタデータは `/.meta`
-* `/foo/` に対応するメタデータは `/foo/.meta`
-* `/foo/bar.json` に対応するメタデータは `/foo/bar.json.meta`
-となる。  
-名前の重複が起きないよう、名前の最後が .meta で終わるようなディレクトリは作成できないようにする。  
-メタデータの中身は以下のようなJSON。  
+環境に合わせて、以下の設定を適宜編集する。  
 
-```json
-{
-  "size": "10.4KB",
-  "bytes": 10634,
-  "is_dir": false,
-  "owner": "xxx-xxx-xxx-xxx",
-  ...
-}
+#### unicornの設定
+
+アプリサーバーとして [unicorn](http://unicorn.bogomips.org/) を使用している。  
+設定ファイルは config/unicorn.conf にあるので、[ドキュメント](http://unicorn.bogomips.org/Unicorn/Configurator.html) を参考に環境に合わせた設定を行う。  
+また、[unicorn-worker-killer](https://github.com/kzk/unicorn-worker-killer) でworkerを再起動するので、config/initializers/unicorn_worker_killer.rb の設定も適宜変更する。  
+
+#### ストレージの設定
+
+ファイルの保存や権限管理などには [store_agent](https://github.com/realglobe-Inc/store_agent) を使用している。  
+設定は config/initializers/store_agent.rb で行っているので、[ドキュメント](https://github.com/realglobe-Inc/store_agent)を参考に適切な値を設定する。  
+
+#### MongoDBの設定
+
+Tin Can Statements API を使用する場合は [MongoDB](http://www.mongodb.org) をデータベースとして使用する。  
+MongoDB自体のインストール方法や設定などは公式サイトの[ドキュメント](http://docs.mongodb.org/manual/)を参照。  
+アプリからMontoDBへの接続には [Mongoid](http://mongoid.org/) を使用しているので、[ドキュメント](http://mongoid.org/en/mongoid/docs/installation.html#configuration)を参考に config/mongoid.yml を適切に設定する。  
+
+#### エラー通知メールの設定
+
+config/settings_logic/mailer_settings.yml の exception_notification 以下の notify_errors を true に設定すると、[exception_notification](http://smartinez87.github.io/exception_notification/) で例外をメールで通知するようになる。  
+メールの送信者や送信先、smtpなどのActionMailerの設定もこのファイルで行うので、環境に合わせて適切に設定する。  
+
+#### Godの設定
+
+[God](http://godrb.com) でunicornのmasterプロセスを監視し、プロセスが落ちている場合には自動で再起動を行う。  
+プロセスの再起動時にはメールで通知する。メールの送信先などは config/god.yml で設定する。  
+デフォルトではGodのメール送信には /usr/sbin/sendmail を使用しているので、smtpを使用する場合には script/shared.god.rb を編集する。  
+
+### 起動
+
+gemをインストール
+
+```sh
+$ bundle install --path vendor/bundle
 ```
 
+god + unicornを起動する
 
-## 権限情報
+```sh
+$ env RAILS_ENV=development GOD_PORT=17165 ./script/unicorn.sh start
+```
 
-ファイルディレクトリと同じ構成で /permission/ 以下にツリーを作成する。  
-storage/${path} に対応する権限情報は permission/${path}.perm に保存する。  
-中身は以下のようなJSON。  
+## 認証
 
-```json
+### edo-authのインストール
+
+APIの認証には [edo-auth](https://github.com/realglobe-Inc/edo-auth) を使用するので、事前にインストールしておく。  
+
+### ユーザー/サービスの認証
+
+edo-auth の認証に通過すると X-Edo-Auth-Ta-Id ヘッダが付与されるので、これをサービスIDとして使用する。  
+ユーザーIDは付与されないので、クライアントが `X-Edo-User-Id: xxx-xxx-xxx-xxx` のようにリクエストヘッダで指定する。  
+
+## 使用方法
+
+### ユーザー登録
+
+```sh
+$ curl -H "Content-Type: application/json" https://pds.example.com/v1/users -d '{"user_uid": "user-xxx-xxx-uid"}'
+```
+
+### サービス登録
+
+```sh
+$ curl -H "Content-Type: application/json" https://pds.example.com/v1/users/user-xxx-xxx-uid/services -d '{"service_uid": "service-xxx-xxx-uid"}'
+```
+
+### ファイル/ディレクトリ操作
+
+```sh
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/directory/foo -X PUT
+# => 201 Created
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/directory/bar -X PUT
+# => 201 Created
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/file/foo/test.txt -d "test file body"
+# => 201 Created
+
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/directory
+# => [{"name":"foo","is_dir":true},{"name":"bar","is_dir":true}]
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/file/foo/test.txt
+# => test file body
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/file/foo/test.txt -d "update file"
+# => {"status_code":403,"error_code":"OverwriteIsNotTrue","descriptions":[...]}
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/file/foo/test.txt?overwrite=true -d "update file"
+# => 200 OK
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/file/foo/test.txt
+# => update file
+
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/directory/foo -X DELETE
+# => 204 No Content
+$ curl -H "X-Edo-User-Id: xxx-xxx-xxx-xxx" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/directory
+# => [{"name":"bar","is_dir":true}]
+```
+
+### Tin Can Statements
+
+MongoDBの設定をしてある場合、Tin Can Statements API が使用できる。  
+
+```sh
+$ curl -H "Content-Type: application/json" https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/statements -d @- <<EOF
 {
-  "users":{
-    "xxx-xxx-xxx-xxx":{
-      "read":true,
-      "write":true,
-      "execute":true
-    }
+  "id": "statements-xxx-xxx-uuid",
+  "actor": {
+    "mbox": "test_user@realglobe.jp"
   },
-  "guest":{
-    "read":true,
-    "execute":true
+  "verb": {
+    "id": "http://realglobe.jp/did"
+  },
+  "object": {
+    "id": "http://realglobe.jp/it"
   }
 }
+EOF
+# => statements-xxx-xxx-uuid
+
+$ curl https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/statements
+# => [{"id": "statements-xxx-xxx-uuid","actor":{...},"verb":{...},"object":{...},...}]
+
+$ curl https://pds.example.com/v1/users/user-xxx-xxx-uid/services/service-xxx-xxx-uid/statementsattachments=true
+# => ...
 ```
 
 ## API
