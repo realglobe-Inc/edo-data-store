@@ -1,0 +1,29 @@
+lib_src_dir: "{{ app_user_home }}/src"
+lib_install_dir: "{{ app_user_home }}/lib"
+
+apache_src_dir: "{{ lib_src_dir }}/httpd-{{ apache_version }}"
+apache_install_dir: "{{ app_user_home }}/apache_{{ apache_version }}"
+apache_symlink_path: "{{ app_user_home }}/apache"
+apr_src_dir: "{{ lib_src_dir }}/apr-{{ apr_version }}"
+apr_install_dir: "{{ lib_install_dir }}/apr-{{ apr_version }}"
+apr_util_src_dir: "{{ lib_src_dir }}/apr-util-{{ apr_util_version }}"
+apr_util_install_dir: "{{ lib_install_dir }}/apr-util-{{ apr_util_version }}"
+openssl_src_dir: "{{ lib_src_dir }}/openssl-{{ openssl_version }}"
+openssl_install_dir: "{{ lib_install_dir }}/openssl-{{ openssl_version }}"
+pcre_src_dir: "{{ lib_src_dir }}/pcre-{{ pcre_version }}"
+pcre_install_dir: "{{ lib_install_dir }}/pcre-{{ pcre_version }}"
+
+apache_version: 2.4.10
+apr_version: 1.5.1
+apr_util_version: 1.5.4
+openssl_version: 1.0.1j
+pcre_version: 8.36
+apache_tar_archive_filename: httpd-{{ apache_version }}.tar.gz
+apr_tar_archive_filename: apr-{{ apr_version }}.tar.gz
+apr_util_tar_archive_filename: apr-util-{{ apr_util_version }}.tar.gz
+openssl_tar_archive_filename: openssl-{{ openssl_version }}.tar.gz
+pcre_tar_archive_filename: pcre-{{ pcre_version }}.tar.gz
+ssl_key_dir: "{{ app_user_home }}/private"
+ssl_crt_path: "{{ ssl_key_dir }}/server.crt"
+ssl_key_path: "{{ ssl_key_dir }}/server.key"
+apache_init_script: /etc/init.d/httpd

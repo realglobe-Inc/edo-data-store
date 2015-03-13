@@ -1,0 +1,35 @@
+- name: download openssl tar archive
+  get_url: url=http://www.openssl.org/source/{{ openssl_tar_archive_filename }} dest={{ lib_src_dir }}/{{ openssl_tar_archive_filename }}
+  register: wget_openssl
+- name: unpack openssl tar archive
+  command: tar zxf {{ openssl_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_openssl.changed
+- name: git clone headers-more module
+  git: repo=https://github.com/agentzh/headers-more-nginx-module.git
+    dest={{ lib_src_dir }}/headers-more-nginx-module
+    version={{ headers_more_module_version }}
+- name: download pcre tar archive
+  get_url: url=ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/{{ pcre_tar_archive_filename }} dest={{ lib_src_dir }}/{{ pcre_tar_archive_filename }}
+  register: wget_pcre
+- name: unpack pcre tar archive
+  command: tar zxf {{ pcre_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_pcre.changed
+- include: lua_module.yml
+  when: "install_lua == 'true'"
+- name: download nginx tar archive
+  get_url: url=http://nginx.org/download/{{ nginx_tar_archive_filename }} dest={{ lib_src_dir }}/{{ nginx_tar_archive_filename }}
+  register: wget_nginx
+- name: unpack nginx tar archive
+  command: tar zxf {{ nginx_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_nginx.changed
+- include: compile_nginx.yml
+  when: wget_nginx.changed
+- name: update nginx.conf
+  template: src=nginx.conf.j2 dest={{ nginx_symlink_path }}/conf/nginx.conf
+- name: nginx init script
+  template: src=nginx_init_script.sh.j2 dest=/etc/init.d/nginx mode=755
+  sudo: true
+  when: wget_nginx.changed
+- name: start nginx
+  service: name=nginx state=started enabled=yes
+  sudo: true

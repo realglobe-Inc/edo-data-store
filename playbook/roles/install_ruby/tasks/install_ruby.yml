@@ -1,0 +1,6 @@
+- name: install ruby
+  command: rbenv install {{ ruby_version }}
+- name: set rbenv global
+  command: rbenv global {{ ruby_version }}
+- name: install bundler
+  command: gem install bundler

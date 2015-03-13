@@ -1,0 +1,9 @@
+notify_receiver: "edo_pds_developers"
+from_email:
+  development: "edo_pds_dev@ui-dev00.c4sa.jp"
+  staging: "azureuser@jmooc-pds.jgec.net"
+  production: "azureuser@jmooc-pds.jgec.net"
+to_email:
+  development: "server-ml@realglobe.jp"
+  staging: "server-ml@realglobe.jp"
+  production: "server-ml@realglobe.jp"

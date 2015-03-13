@@ -1,0 +1,18 @@
+luajit_src_dir: "{{ lib_src_dir }}/LuaJIT-{{ luajit_version }}"
+luajit_install_dir: "{{ lib_install_dir }}/LuaJIT-{{ luajit_version }}"
+lua_cjson_src_dir: "{{ lib_src_dir }}/lua-cjson"
+cmake_src_dir: "{{ lib_src_dir }}/cmake-{{ cmake_version }}"
+curl_src_dir: "{{ lib_src_dir }}/curl-{{ curl_version }}"
+curl_install_dir: "{{ lib_install_dir }}/curl-{{ curl_version }}"
+lua_curl_src_dir: "{{ lib_src_dir }}/lua-curl"
+lua_openssl_src_dir: "{{ lib_src_dir }}/lua-openssl"
+
+luajit_version: 2.0.3
+lua_cjson_version: 2.1.0
+cmake_version: 3.0.0
+curl_version: 7.37.1
+lua_curl_version: HEAD
+lua_openssl_version: 1d5c3be
+luajit_tar_archive_filename: LuaJIT-{{ luajit_version }}.tar.gz
+cmake_tar_archive_filename: cmake-{{ cmake_version }}.tar.gz
+curl_tar_archive_filename: curl-{{ curl_version }}.tar.gz

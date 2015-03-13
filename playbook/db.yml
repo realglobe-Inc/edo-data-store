@@ -1,0 +1,9 @@
+- hosts: db
+  remote_user: "{{ remote_user }}"
+  sudo: yes
+  roles:
+    - mongodb
+    #- mariadb
+  vars_files:
+    - group_vars/app_settings.yml
+    - group_vars/db_settings.yml

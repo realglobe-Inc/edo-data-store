@@ -1,0 +1,10 @@
+- name: install libraries
+  yum: name=emacs,git,gcc,gcc-c++,wget,openssl-devel,readline-devel,cmake
+  when: (ansible_distribution == 'CentOS') and (ansible_distribution_version == '6.5')
+- name: install MariaDB-devel
+  yum: name=MariaDB-devel state=present enablerepo=mariadb
+  register: install_mariadb_devel
+  ignore_errors: true
+- name: install mysql-devel state=present
+  yum: name=mysql-devel
+  when: install_mariadb_devel|failed

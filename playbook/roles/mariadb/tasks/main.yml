@@ -1,0 +1,20 @@
+- name: set yum repository for the mariadb
+  template: src=mariadb.repo.j2 dest=/etc/yum.repos.d/mariadb.repo mode=0644 owner=root group=root
+- name: remove mysql-libs
+  yum: name=mysql-libs state=absent
+- name: install mariadb
+  yum: name=MariaDB-server state=present enablerepo=mariadb
+- name: copy my.cnf
+  command: cp /usr/share/mysql/my-large.cnf /etc/my.cnf.d/
+- name: copy server.cnf
+  copy: src=server.cnf dest=/etc/my.cnf.d/server.cnf mode=0644 owner=root group=root
+
+# when centos6.5
+- name: be sure mysql is running and enabled
+  service: name=mysql state=running enabled=yes
+  when: "ansible_distribution_version == '6.5'"
+
+- name: add user
+  shell: echo 'GRANT ALL PRIVILEGES ON {{ database_name }}.* to {{ database_user }}@{{ app_host }} IDENTIFIED BY "{{ database_password }}" WITH GRANT OPTION;' | mysql -u root
+
+# TODO iptables

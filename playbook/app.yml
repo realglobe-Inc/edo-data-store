@@ -1,0 +1,21 @@
+- hosts: app
+  remote_user: "{{ remote_user }}"
+  sudo: yes
+  roles:
+    - install_libs
+    - add_user
+  vars_files:
+    - group_vars/app_settings.yml
+
+- hosts: app
+  remote_user: "{{ app_user }}"
+  sudo: no
+  roles:
+    - install_ruby
+    - rails_app
+    - redis
+    #- apache
+    - nginx
+  vars_files:
+    - group_vars/app_settings.yml
+    - group_vars/db_settings.yml

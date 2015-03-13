@@ -1,0 +1,41 @@
+default_sessions: &default_sessions
+  database: {{ mongodb.database }}
+  username: {{ mongodb.username }}
+  password: {{ mongodb.password }}
+  hosts: {{ mongodb.hosts }}
+default_options: &default_options
+  include_root_in_json: true
+  include_type_for_serialization: true
+  preload_models: false
+  raise_not_found_error: true
+  scope_overwrite_exception: true
+  use_activesupport_time_zone: true
+  use_utc: false
+
+development:
+  sessions:
+    default:
+      <<: *default_sessions
+      database: {{ mongodb.database }}
+  options:
+    <<: *default_options
+
+test:
+  sessions:
+    default:
+      <<: *default_sessions
+      database: {{ mongodb.database }}_test
+      options:
+        read: primary
+        max_retries: 1
+        retry_interval: 0
+  options:
+    <<: *default_options
+
+production:
+  sessions:
+    default:
+      <<: *default_sessions
+      database: {{ mongodb.database }}_prod
+  options:
+    <<: *default_options

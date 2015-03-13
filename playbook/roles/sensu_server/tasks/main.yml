@@ -1,0 +1,52 @@
+- name: install postfix
+  yum: name=postfix state=present
+- name: install openssl
+  yum: name=openssl state=present
+- name: install erlang
+  yum: name=erlang state=present
+- name: install rabbitMQ
+  yum: name=rabbitmq-server state=present
+  register: install_rabbitmq
+- name: mkdir rabbitmq ssl directory
+  file: path=/etc/rabbitmq/ssl state=directory
+  when: install_rabbitmq.changed
+- name: copy pem files
+  unarchive: src=rabbitmq_ssl.tar.gz dest=/etc/rabbitmq
+- name: copy rabbitmq.config
+  copy: src=rabbitmq.config dest=/etc/rabbitmq/rabbitmq.config
+  when: install_rabbitmq.changed
+- name: start rabbitmq-server
+  service: name=rabbitmq-server state=started enabled=yes
+  when: install_rabbitmq.changed
+- name: create rabbitmq vhost for sensu
+  command: rabbitmqctl add_vhost {{ rabbitmq_sensu_vhost }}
+  when: install_rabbitmq.changed
+- name: add rabbitmq user
+  command: rabbitmqctl add_user {{ rabbitmq_sensu_user }} {{ rabbitmq_sensu_password }}
+  when: install_rabbitmq.changed
+- name: add permission
+  command: rabbitmqctl set_permissions -p {{ rabbitmq_sensu_vhost }} {{ rabbitmq_sensu_user }} ".*" ".*" ".*"
+- name: install redis
+  yum: name=redis state=present
+- name: start redis
+  service: name=redis state=started enabled=yes
+- name: set yum repository for sensu
+  copy: src=sensu.repo dest=/etc/yum.repos.d/sensu.repo mode=0644 owner=root group=root
+- name: install sensu
+  yum: name=sensu state=present enablerepo=sensu
+- name: install mail gem
+  command: /opt/sensu/embedded/bin/gem install mail -v 2.5.4
+- name: git clone sensu community plugins
+  git: repo=https://github.com/sensu/sensu-community-plugins.git dest={{ sensu_community_plugins_directory }}
+- name: copy setting
+  copy: src=sensu_setting dest=/etc/default/sensu
+- name: copy config.json
+  template: src=config.json.j2 dest=/etc/sensu/config.json
+- name: copy conf.d/checks.json
+  template: src=checks.json.j2 dest=/etc/sensu/conf.d/checks.json
+- name: copy conf.d/mailer.json
+  template: src=mailer.json.j2 dest=/etc/sensu/conf.d/mailer.json
+- name: start sensu-server
+  service: name=sensu-server state=started enabled=yes
+- name: start sensu-api
+  service: name=sensu-api state=started enabled=yes

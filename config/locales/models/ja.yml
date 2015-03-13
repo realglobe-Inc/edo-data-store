@@ -1,0 +1,42 @@
+ja:
+  mongoid:
+    attributes:
+      statement:
+        actor: actor
+        verb: verb
+        object: object
+        result: result
+        context: context
+        timestamp: timestamp
+        authority: authority
+        attachments: attachments
+        stored: stored
+        version: version
+    errors:
+      models:
+        statement:
+          attributes:
+            base: &base
+              invalid_value: "の型が不正です。"
+            id:
+              <<: *base
+            actor:
+              <<: *base
+            verb:
+              <<: *base
+            object:
+              <<: *base
+            result:
+              <<: *base
+            context:
+              <<: *base
+            timestamp:
+              <<: *base
+            authority:
+              <<: *base
+            attachments:
+              <<: *base
+            stored:
+              <<: *base
+            version:
+              <<: *base

@@ -1,0 +1,24 @@
+ja:
+  json:
+    template:
+      description:
+        json_parse_error: "JSON として不正なフォーマットです。"
+        parse_params_error: "パラメータの形式が不正です。"
+        user_not_found: "UIDが %{user_uid} のユーザーは登録されていません。"
+        user_already_exists: "UIDが %{user_uid} のユーザーは既に登録されています。"
+        service_not_found: "UIDが %{service_uid} のサービスは登録されていません。"
+        service_already_exists: "UIDが %{service_uid} のサービスは既に登録されています。"
+        invalid_content_type: "Content-Type ヘッダに %{content_type} を指定してください。"
+        invalid_statement_value: "Tin Canステートメントとして不正なフォーマットです。"
+        duplicated_id: "%{id} は既に使用されています。"
+        permission_denied: "権限がありません。"
+        resource_not_found: "%{path} にファイル/ディレクトリが存在しません。"
+        resource_already_exists: "%{path} には既にファイルが存在します。"
+        directory_already_exists: "%{dest_path} には既にディレクトリが存在します。"
+        con_not_copy_directory_to_file: "ディレクトリ %{path} をファイル %{dest_path} にコピーする事はできません。"
+        is_directory: "%{path} はディレクトリです。"
+        is_not_directory: "%{path} はディレクトリではありません。"
+        is_not_file: "%{path} はファイルではありません。"
+        overwrite_is_not_true: "%{path} にはファイルが既に存在します。上書きする場合は overwrite=true を指定してください。"
+        required_target_params: "target_user、target_service は必須パラメータです。"
+        unexpected_error: "エラーが発生しました。"

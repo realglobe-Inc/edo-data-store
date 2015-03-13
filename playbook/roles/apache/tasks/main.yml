@@ -1,0 +1,40 @@
+- name: make src directory
+  file: path={{ lib_src_dir }} state=directory owner={{ app_user }} group={{ app_user }}
+- name: make lib directory
+  file: path={{ lib_install_dir }} state=directory owner={{ app_user }} group={{ app_user }}
+- name: download openssl tar archive
+  get_url: url=http://www.openssl.org/source/{{ openssl_tar_archive_filename }} dest={{ lib_src_dir }}/{{ openssl_tar_archive_filename }}
+  register: wget_openssl
+- name: unpack openssl tar archive
+  command: tar zxf {{ openssl_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_openssl.changed
+- name: configure openssl
+  command: ./config --prefix={{ openssl_install_dir }}/ssl -fPIC shared zlib-dynamic threads chdir={{ openssl_src_dir }}
+  when: wget_openssl.changed
+- name: make openssl
+  command: make chdir={{ openssl_src_dir }}
+  when: wget_openssl.changed
+- name: make install openssl
+  command: make install chdir={{ openssl_src_dir }}
+  when: wget_openssl.changed
+- name: download pcre tar archive
+  get_url: url=ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/{{ pcre_tar_archive_filename }} dest={{ lib_src_dir }}/{{ pcre_tar_archive_filename }}
+  register: wget_pcre
+- name: unpack pcre tar archive
+  command: tar zxf {{ pcre_tar_archive_filename }} chdir={{ lib_src_dir }}
+  when: wget_pcre.changed
+- name: configure pcre
+  command: ./configure --prefix={{ pcre_install_dir }} chdir={{ pcre_src_dir }}
+  when: wget_pcre.changed
+- name: make pcre
+  command: make chdir={{ pcre_src_dir }}
+  when: wget_pcre.changed
+- name: make install pcre
+  command: make install chdir={{ pcre_src_dir }}
+  when: wget_pcre.changed
+- include: lua_module.yml
+  when: "install_lua == 'true'"
+- include: install_apache.yml
+- name: start apache
+  service: name=httpd state=started enabled=yes
+  sudo: true

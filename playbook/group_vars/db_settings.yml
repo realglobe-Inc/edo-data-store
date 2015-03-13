@@ -1,0 +1,11 @@
+database_name: edo_pc
+database_user: edo_pc
+database_password: hogehoge
+database_host: 192.168.33.13
+
+mongodb:
+  database: edo_pc
+  username: "{{ app_user }}"
+  password: hogehoge
+  hosts:
+    - 192.168.33.13:27017

@@ -1,0 +1,12 @@
+- name: add wheel group
+  user: name={{ app_user }} append=yes groups=wheel
+- name: add sudoers
+  lineinfile: >
+    dest=/etc/sudoers
+    line='%wheel ALL=NOPASSWD: ALL'
+- name: make .ssh directory
+  file: path={{ app_user_home }}/.ssh state=directory owner={{ app_user }} group={{ app_user }}
+- name: copy id_rsa
+  copy: src=~/.ssh/id_rsa dest={{ app_user_home }}/.ssh owner={{ app_user }} group={{ app_user }} mode=600
+- name: copy authorized_keys
+  copy: src=~/.ssh/authorized_keys dest={{ app_user_home }}/.ssh/ owner={{ app_user }} group={{ app_user }} mode=600

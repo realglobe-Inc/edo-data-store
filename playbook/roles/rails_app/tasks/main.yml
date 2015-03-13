@@ -1,0 +1,20 @@
+- name: copy id_rsa_github
+  copy: src=~/.ssh/id_rsa_github dest={{ app_user_home }}/.ssh/id_rsa owner={{ app_user }} group={{ app_user }} mode=600
+- name: git clone app
+  git: repo={{ git_repository }} dest={{ app_root }} version=development accept_hostkey=yes
+  register: git_clone_app
+- include: update_app.yml
+  when: git_clone_app.changed
+- name: copy logrotate.conf
+  template: src=rails_logrotate.conf.j2 dest=/etc/logrotate.d/rails_app
+  sudo: yes
+- name: copy god_unicorn init script
+  template: src=god_unicorn_init_script.sh.j2 dest=/etc/init.d/god_unicorn mode=755
+  sudo: yes
+- name: start god_unicorn
+  service: name=god_unicorn state=started enabled=yes
+  sudo: yes
+  register: start_god_unicorn
+- name: reload unicorn
+  service: name=god_unicorn state=reloaded
+  when: not start_god_unicorn.changed

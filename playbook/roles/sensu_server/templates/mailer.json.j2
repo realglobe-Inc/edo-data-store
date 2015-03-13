@@ -1,0 +1,9 @@
+{
+  "handlers": {
+    "mailer": {
+      "type": "pipe",
+      "command": "{{ sensu_embedded_ruby }} {{ sensu_community_plugins_directory }}/handlers/notification/mailer.rb"
+    }
+  },
+  "mailer": {{ mailer_settings|replace("'", '"') }}
+}

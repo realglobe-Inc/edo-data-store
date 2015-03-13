@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# god
+#
+# chkconfig: - 81 19
+# description: god
+# processname: god
+# pidfile: {{ app_root }}/tmp/pids/god_{{ god_port }}.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+case "$1" in
+    start|stop|load|restart|reload)
+	su {{ app_user }} -l -c "cd {{ app_root }} && env RAILS_ENV={{ rails_env }} GOD_PORT={{ god_port }} ./script/unicorn.sh $1"
+        ;;
+    status)
+	status -p {{ app_root }}/tmp/pids/god_{{ god_port }}.pid god_unicorn
+	;;
+    *)
+        echo $"Usage: $0 {start|stop|load|restart|reload}"
+        exit 2
+esac
+exit $?

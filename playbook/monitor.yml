@@ -1,0 +1,26 @@
+- hosts: sensu-server
+  remote_user: "{{ remote_user }}"
+  sudo: yes
+  roles:
+    - sensu_server
+  vars_files:
+    - group_vars/sensu_settings.yml
+
+- hosts: sensu-clients
+  remote_user: "{{ remote_user }}"
+  sudo: yes
+  roles:
+    - sensu_client
+  vars_files:
+    - group_vars/sensu_settings.yml
+
+- hosts: sensu-server
+  remote_user: "{{ remote_user }}"
+  sudo: yes
+  tasks:
+    - name: restart sensu-api
+      service: name=sensu-api state=restarted
+    - name: restart sensu-server
+      service: name=sensu-server state=restarted
+  vars_files:
+    - group_vars/sensu_settings.yml

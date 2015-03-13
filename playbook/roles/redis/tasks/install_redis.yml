@@ -1,0 +1,14 @@
+- name: make redis
+  command: make chdir={{ redis_src_dir }}
+- name: make install redis
+  command: make install PREFIX={{ redis_install_dir }} chdir={{ redis_src_dir }}
+- name: create symlink
+  file: src={{ redis_install_dir }} path={{ redis_symlink_path }} state=link force=yes
+- name: copy redis.conf
+  template: src=redis.conf.j2 dest={{ redis_bin_dir }}/redis.conf
+- name: copy redis init script
+  template: src=redis_init_script.sh.j2 dest=/etc/init.d/redis mode=755
+  sudo: true
+- name: copy logrotate.conf
+  template: src=redis_logrotate.conf.j2 dest=/etc/logrotate.d/redis
+  sudo: true
