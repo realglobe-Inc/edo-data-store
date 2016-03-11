@@ -52,4 +52,4 @@ group :test do
   gem "timecop"
 end
 
-gem "store_agent", git: "https://github.com/realglobe-Inc/store_agent.git"
+gem "store_agent"
